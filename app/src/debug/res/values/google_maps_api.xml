@@ -1,0 +1,21 @@
+<resources>
+    <!--
+    TODO: Before you run your application, you need a Google Maps API key.
+
+    To get one, follow this link, follow the directions and press "Create" at the end:
+
+    https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=DE:8E:5A:BC:90:50:CC:96:E8:78:24:CE:17:F8:38:A6:14:03:78:2F%3Bjp.gr.java_conf.kzstudio.walkingtracker
+
+    You can also add your credentials to an existing key, using this line:
+    DE:8E:5A:BC:90:50:CC:96:E8:78:24:CE:17:F8:38:A6:14:03:78:2F;jp.gr.java_conf.kzstudio.walkingtracker
+
+    Alternatively, follow the directions here:
+    https://developers.google.com/maps/documentation/android/start#get-key
+
+    Once you have your key (it starts with "AIza"), replace the "google_maps_key"
+    string in this file.
+    -->
+    <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
+        AIzaSyBLPdCE4LL6V9cqS7ZzIGd470064hRk8uk
+    </string>
+</resources>

@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">WalkingTracker</string>
+    <string name="title_activity_gps_track">WalkingTracker</string>
+</resources>
