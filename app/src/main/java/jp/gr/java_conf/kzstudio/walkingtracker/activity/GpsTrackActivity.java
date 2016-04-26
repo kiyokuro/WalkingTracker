@@ -17,6 +17,7 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -56,8 +58,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
     private int mCount = 0;
     private int mCheckPointNum = 1;
     private boolean isStart = false;//位置情報取得をスタートしているか
-    private boolean isMarkerExist = false;
-    private boolean isPutMakerHere = false;
+    private boolean isMarkerExist = false;//現在の座標にマーカがあるか
 
     private View mProgressView;
     private View mSwitchExplainView;
@@ -175,7 +176,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, this);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 1, this);
     }
 
 
@@ -191,6 +192,11 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        if (!isMarkerExist) {
+            LatLng nowArea = new LatLng(mLat, mLon);
+            mMaker = mMap.addMarker(new MarkerOptions().position(nowArea).title("現在地"));
+            //isMarkerExist = true;
+        }
     }
 
     /**
@@ -199,12 +205,9 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
     private void showNowLocation() {
         //mMaker.remove();
         LatLng nowArea = new LatLng(mLat, mLon);
-        if (!isMarkerExist) {
-            mMaker = mMap.addMarker(new MarkerOptions().position(nowArea).title("現在地"));
-            isMarkerExist = true;
-        }
+
         CameraPosition camerapos = new CameraPosition.Builder()
-                .target(nowArea).zoom(17f).build();
+                .target(nowArea).zoom(18f).build();
         mMaker.setPosition(nowArea);
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(camerapos));
     }
@@ -241,7 +244,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         //mLocationManager.removeUpdates(mLocationListener);
         mPositions.add(new LatLng(mLat,mLon));
         mCount++;
-        isPutMakerHere = false;
+        isMarkerExist = false;
         isStart = true;
         mPoints.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), false, "", "", ""));
         showNowLocation();
@@ -293,12 +296,13 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 final EditText editView = new EditText(this);
                 new AlertDialog.Builder(GpsTrackActivity.this)
                         .setIcon(android.R.drawable.ic_dialog_info)
-                        .setTitle("チェックポイント名を入力してください")
+                        .setTitle("このポイントに記録することを記入してください")
                         .setCancelable(false)
                         .setView(editView)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                checkPointTitle[0] = editView.getText().toString();
+                                //checkPointTitle[0] = editView.getText().toString();
+                                createMarker(editView.getText().toString(), editView.getText().toString());
                             }
                         })
                         .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
@@ -308,15 +312,11 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         })
                         .show();
 
-                if(isStart && !isPutMakerHere) {
-                    mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(mLat, mLon))
-                            .title(checkPointTitle[0])
-                            .snippet("コメント"));
-                    mPoints.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, "", "", String.valueOf(mCheckPointNum)));
-                    mCheckPointNum++;
-                    isPutMakerHere = true;
-                }
+                Log.i("aaa", "a " + checkPointTitle[0]);
+
+                mPoints.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, "", "", String.valueOf(mCheckPointNum)));
+                mCheckPointNum++;
+                isMarkerExist = true;
                 break;
             case R.id.regist_route_button:
                 //registBusStopList(mBusCourseCode, mPoints);
@@ -332,6 +332,13 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
+    private void createMarker(String title, String comment){
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(mLat, mLon))
+                .title(title)
+                //.snippet(comment)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+    }
 
     private void changeActivity(){
         //Intent intent = new Intent(this, GpsTrackDataFixActivity.class);
@@ -358,16 +365,16 @@ class GpsPoint implements Serializable {
     boolean markerExist;
     String title = "";
     String comment = "";
-    String busStopNum;
+    String checkPointNum;
 
-    public GpsPoint(String order, String lan, String lon, boolean markerExist, String title, String comment, String busStopNum){
+    public GpsPoint(String order, String lan, String lon, boolean markerExist, String title, String comment, String checkPointNum){
         this.order = order;
         this.lan = lan;
         this.lon = lon;
         this.markerExist = markerExist;
         this.title = title;
         this.comment = comment;
-        this.busStopNum = busStopNum;
+        this.checkPointNum = checkPointNum;
     }
 
     public String getOrder() {
@@ -394,7 +401,7 @@ class GpsPoint implements Serializable {
         return comment;
     }
 
-    public String getBusStopNum() {
-        return busStopNum;
+    public String getCheckPointNum() {
+        return checkPointNum;
     }
 }
