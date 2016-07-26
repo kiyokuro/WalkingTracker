@@ -30,6 +30,7 @@
 
         <activity
             android:name=".activity.GpsTrackActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_gps_track" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

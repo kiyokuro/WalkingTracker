@@ -17,24 +17,26 @@ android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="right"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
         android:layout_marginTop="4dp"
         android:layout_marginRight="4dp">
         <Button
             android:id="@+id/regist_route_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="280dp"
+            android:layout_height="230dp"
             android:text="ルート登録"
-            android:layout_gravity="right"
-            />
+            android:textSize="50dp"
+            android:background="@drawable/frame_boder1"
+            android:layout_marginRight="20dp"/>
         <Button
             android:id="@+id/reset_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="280dp"
+            android:layout_height="230dp"
             android:text="ルート削除"
-            android:layout_gravity="right"
-            android:layout_marginTop="2dp"/>
+            android:textSize="50dp"
+            android:background="@drawable/frame_boder1"
+            android:layout_marginLeft="20dp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -84,7 +86,7 @@ android:layout_height="match_parent">
         android:layout_weight="1"
         android:textOn="Stop"
         android:textOff="Start"
-        android:background="#00aaf4"
+        android:background="#A5C261"
         android:layout_marginLeft="4dp"
         android:layout_marginTop="2dp"/>
     <Button
@@ -93,7 +95,7 @@ android:layout_height="match_parent">
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="チェックポイントを追加"
-        android:background="#00aaf4"
+        android:background="#A5C261"
         android:layout_margin="4dp"
         />
 </LinearLayout>

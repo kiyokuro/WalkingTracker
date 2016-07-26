@@ -312,8 +312,6 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         })
                         .show();
 
-                Log.i("aaa", "a " + checkPointTitle[0]);
-
                 mPoints.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, "", "", String.valueOf(mCheckPointNum)));
                 mCheckPointNum++;
                 isMarkerExist = true;
