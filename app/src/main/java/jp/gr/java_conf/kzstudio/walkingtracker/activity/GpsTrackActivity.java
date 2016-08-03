@@ -37,9 +37,11 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import jp.gr.java_conf.kzstudio.walkingtracker.R;
+import jp.gr.java_conf.kzstudio.walkingtracker.util.GpsPoint;
 
 public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, View.OnClickListener {
 
@@ -172,11 +174,13 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                     .show();
         }
 
-        //現在地取得開始
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
+        if (Build.VERSION.SDK_INT >= 23) {
+            //現在地取得開始
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
         }
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 1, this);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 3, this);
     }
 
 
@@ -279,8 +283,10 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                     getLocation();
                 } else {
                     isStart = false;
-                    if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        return;
+                    if (Build.VERSION.SDK_INT >= 23) {
+                        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            return;
+                        }
                     }
                     mLocationManager.removeUpdates(this);//現在地の取得を終了する
                     mRegistRouteButton.setVisibility(View.VISIBLE);
@@ -296,7 +302,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 final EditText editView = new EditText(this);
                 new AlertDialog.Builder(GpsTrackActivity.this)
                         .setIcon(android.R.drawable.ic_dialog_info)
-                        .setTitle("このポイントに記録することを記入してください")
+                        .setTitle("このポイントの記録事項を記入してください。")
                         .setCancelable(false)
                         .setView(editView)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -317,8 +323,26 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 isMarkerExist = true;
                 break;
             case R.id.regist_route_button:
-                //registBusStopList(mBusCourseCode, mPoints);
-                changeActivity();
+                final EditText titleEdit = new EditText(this);
+                final String[] recordTitle = {""};
+                new AlertDialog.Builder(GpsTrackActivity.this)
+                        .setIcon(android.R.drawable.ic_dialog_info)
+                        .setTitle("この記録にタイトルをつけてください。ない場合は自動で日付になります。")
+                        .setCancelable(false)
+                        .setView(titleEdit)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                recordTitle[0] = titleEdit.getText().toString();
+                                changeActivity(recordTitle[0]);
+                            }
+                        })
+                        .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                return;
+                            }
+                        })
+                        .show();
+
                 break;
             case R.id.reset_button:
                 mMap.clear();
@@ -338,10 +362,15 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
     }
 
-    private void changeActivity(){
-        //Intent intent = new Intent(this, GpsTrackDataFixActivity.class);
-        //intent.putExtra("busCourseCode", mBusCourseCode);
+    private void changeActivity(String recordTitle){
+        //Intent intent = new Intent(this, DetailTrackDataActivity.class);
+        //intent.putExtra("pointsList", (Serializable) mPoints);
         //startActivityForResult(intent, 1);
+        Calendar calendar = Calendar.getInstance();
+        String date = calendar.get(Calendar.YEAR)+"/"+(calendar.get(Calendar.MONTH)+1)+"/"+calendar.get(Calendar.DAY_OF_MONTH);
+        //サーバに登録する処理を書く。登録日時も取得して送信
+        //座標点の情報はmPointのリストに格納してある。
+        finish();
     }
 
     @Override
@@ -356,50 +385,4 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
     }
 }
 
-class GpsPoint implements Serializable {
-    String order;
-    String lan;
-    String lon;
-    boolean markerExist;
-    String title = "";
-    String comment = "";
-    String checkPointNum;
 
-    public GpsPoint(String order, String lan, String lon, boolean markerExist, String title, String comment, String checkPointNum){
-        this.order = order;
-        this.lan = lan;
-        this.lon = lon;
-        this.markerExist = markerExist;
-        this.title = title;
-        this.comment = comment;
-        this.checkPointNum = checkPointNum;
-    }
-
-    public String getOrder() {
-        return order;
-    }
-
-    public String getLan() {
-        return lan;
-    }
-
-    public String getLon() {
-        return lon;
-    }
-
-    public boolean isMarkerExist() {
-        return markerExist;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public String getCheckPointNum() {
-        return checkPointNum;
-    }
-}
