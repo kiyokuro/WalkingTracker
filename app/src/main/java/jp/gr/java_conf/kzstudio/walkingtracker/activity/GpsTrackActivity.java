@@ -46,7 +46,7 @@ import jp.gr.java_conf.kzstudio.walkingtracker.util.GpsPoint;
 public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, View.OnClickListener {
 
     private final int _REQUEST_PERMISSION_GPS = 10;
-    private static final float POLYLINE_WIDTH_IN_PIXELS = 8;
+    private static final float POLYLINE_WIDTH_IN_PIXELS = 6;
 
     private GoogleMap mMap;
     private Marker mMaker;

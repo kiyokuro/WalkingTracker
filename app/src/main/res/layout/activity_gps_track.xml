@@ -23,7 +23,7 @@ android:layout_height="match_parent">
         android:layout_marginRight="4dp">
         <Button
             android:id="@+id/regist_route_button"
-            android:layout_width="280dp"
+            android:layout_width="270dp"
             android:layout_height="230dp"
             android:text="ルート登録"
             android:textSize="50dp"
@@ -31,7 +31,7 @@ android:layout_height="match_parent">
             android:layout_marginRight="20dp"/>
         <Button
             android:id="@+id/reset_button"
-            android:layout_width="280dp"
+            android:layout_width="270dp"
             android:layout_height="230dp"
             android:text="ルート削除"
             android:textSize="50dp"
