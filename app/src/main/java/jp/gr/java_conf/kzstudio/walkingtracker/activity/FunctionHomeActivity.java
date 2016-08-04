@@ -1,13 +1,13 @@
 package jp.gr.java_conf.kzstudio.walkingtracker.activity;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,7 +41,7 @@ import jp.gr.java_conf.kzstudio.walkingtracker.util.JsonParser;
  * GPSTrackの新規登録と既存のもを閲覧を選択するホーム画面
  * Created by kiyokazu on 16/08/03.
  */
-public class FunctionHomeActivity extends Activity {
+public class FunctionHomeActivity extends AppCompatActivity {
 
     private ListView mRecordList;
     private Button mRegistButton;
@@ -54,6 +54,7 @@ public class FunctionHomeActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_function_home);
+        setTitle("見回り記録");
 
         mRegistButton = (Button)findViewById(R.id.regist_button);
         mRegistButton.setOnClickListener(new View.OnClickListener() {

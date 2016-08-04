@@ -29,7 +29,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".activity.FunctionHomeActivity"
+            android:name=".activity.SplashActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_gps_track" >
             <intent-filter>
@@ -38,10 +38,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.FunctionHomeActivity"
+            android:configChanges="orientation|screenSize"/>
         <activity android:name=".activity.GpsTrackActivity"
             android:configChanges="orientation|screenSize"/>
         <activity android:name=".activity.DetailTrackDataActivity"
             android:configChanges="orientation|screenSize"/>
+        <activity android:name=".activity.HomeActivity"/>
+        <activity android:name=".activity.LoginActivity"
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
