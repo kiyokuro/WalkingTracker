@@ -1,8 +1,11 @@
 package jp.gr.java_conf.kzstudio.walkingtracker.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 
@@ -31,6 +34,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mWalkingTrackButton = (Button)findViewById(R.id.walking_track_button);
         mWalkingTrackButton.setOnClickListener(this);
         mSettingButton = (Button)findViewById(R.id.setting_button);
+        mSettingButton.setOnClickListener(this);
     }
 
     @Override
@@ -46,7 +50,38 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
                 break;
             case R.id.setting_button:
+                intent = new Intent(this, SettingActivity.class);
+                startActivity(intent);
                 break;
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+        if (keyCode == KeyEvent.KEYCODE_BACK){
+            new AlertDialog.Builder(this)
+                    .setTitle("e-Net cssの終了")
+                    .setMessage("e-Net cssを終了してよろしいですか？")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // TODO 自動生成されたメソッド・スタブ
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // TODO 自動生成されたメソッド・スタブ
+
+                        }
+                    })
+                    .show();
+
+            return true;
+        }
+        return false;
     }
 }
