@@ -18,4 +18,10 @@
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
         <item name="android:background">@+android:color/transparent</item>
     </style>
+
+    <style name="EditTextStyle">
+        <item name="colorControlNormal">#4CAF50</item>
+        <item name="colorControlActivated">#388E3C</item>
+        <item name="android:textColorHighlight">#81C784</item>
+    </style>
 </resources>

@@ -59,7 +59,6 @@ public class LoginActivity extends Activity implements View.OnClickListener{
         inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 
         mUserPreference = new UserPreference(mContext, "UserPref");
-        autoLogin();
     }
 
     @Override
@@ -137,14 +136,6 @@ public class LoginActivity extends Activity implements View.OnClickListener{
             }
         };
         requestQueue.add(jsonObjReq);
-    }
-
-    private void autoLogin(){
-        String userId = mUserPreference.loadUserPreference("USER_ID");
-        String userPassword = mUserPreference.loadUserPreference("USER_PASSWORD");
-        if(!userId.equals("") && !userPassword.equals("")){
-            apiForLogin(userId, userPassword);
-        }
     }
 
     private void changeActivity(){
