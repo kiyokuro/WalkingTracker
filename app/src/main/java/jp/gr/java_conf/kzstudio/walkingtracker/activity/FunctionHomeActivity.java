@@ -88,7 +88,6 @@ public class FunctionHomeActivity extends AppCompatActivity {
                     //通信成功
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.i("response",response.toString());
                         JsonParser jsonParser = new JsonParser();
                         ArrayList<String> dateList= jsonParser.parseObject(response, "date");//下3つの名前はAPIに合わせて適宜変更
                         ArrayList<String> titleList= jsonParser.parseObject(response, "title");
@@ -126,7 +125,6 @@ public class FunctionHomeActivity extends AppCompatActivity {
         }
         );
         requestQueue.add(jsonObjectRequest);
-        Log.i("postData",userId);
 
     }
 
@@ -149,6 +147,7 @@ public class FunctionHomeActivity extends AppCompatActivity {
     private void goGpsTrack(){
         Intent intent = new Intent(this, GpsTrackActivity.class);
         startActivity(intent);
+        finish();
     }
 
     private void changeActivity(String recordId){

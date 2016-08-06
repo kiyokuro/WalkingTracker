@@ -261,7 +261,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         mCount++;
         isMarkerExist = false;
         isStart = true;
-        mPoints.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), false, "", "", ""));
+        mPoints.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), false, " ", " ", " "));
         showNowLocation();
         drawPolyline(mMap, mPositions);
     }
@@ -321,7 +321,8 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 //checkPointTitle[0] = editView.getText().toString();
                                 createMarker(editView.getText().toString(), editView.getText().toString());
-                                mPoints.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, "", editView.getText().toString(), String.valueOf(mCheckPointNum)));
+                                mPoints.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", editView.getText().toString(), String.valueOf(mCheckPointNum)));
+                                mCheckPointNum++;
                             }
                         })
                         .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
@@ -330,7 +331,6 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                             }
                         })
                         .show();
-                mCheckPointNum++;
                 isMarkerExist = true;
                 break;
             case R.id.regist_route_button:
@@ -373,6 +373,16 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
     }
 
+    private String makeStringData(List<GpsPoint> list){
+        String stringData = "";
+        for(int i=0; i<mPoints.size(); i++){
+            stringData += mPoints.get(i).getOrder()+"@"+mPoints.get(i).getLan()+"@"+mPoints.get(i).getLon()+"@"+
+                    String.valueOf(mPoints.get(i).isMarkerExist())+"@"+mPoints.get(i).getTitle()+"@"+
+                    mPoints.get(i).getComment() + "@" + mPoints.get(i).getCheckPointNum()+",";
+        }
+        return stringData;
+    }
+
     private void registData(final String recordTitle){
         UserPreference userPreference = new UserPreference(mContext, "UserPref");
         final String userId = userPreference.loadUserPreference("USER_ID");
@@ -380,8 +390,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         Calendar calendar = Calendar.getInstance(timeZone);
         final String date = calendar.get(Calendar.YEAR)+"/"+(calendar.get(Calendar.MONTH)+1)+"/"+calendar.get(Calendar.DAY_OF_MONTH)+"/"+calendar.get(Calendar.HOUR_OF_DAY)+":"+calendar.get(Calendar.MINUTE);
         //サーバに登録する処理を書く。登録日時も取得して送信
-        JsonMaker jsonMaker = new JsonMaker();
-        final String stringData = jsonMaker.makeGpsPointJson(mPoints);
+        final String stringData = makeStringData(mPoints);
 
         RequestQueue requestQueue = Volley.newRequestQueue(mContext);
         StringRequest stringReq = new StringRequest(
@@ -393,8 +402,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                     public void onResponse(String response) {
                         //Log.i("response",response);
                         if(response.equals("OK")){
-
-                            finish();
+                            goFunctionHome();
                         }else {
                             new AlertDialog.Builder(mContext)
                                     .setTitle("保存できませんでした")
@@ -447,6 +455,11 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         requestQueue.add(stringReq);
     }
 
+    private void goFunctionHome(){
+        Intent intent = new Intent(this, FunctionHomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
         if (keyCode == KeyEvent.KEYCODE_BACK){
