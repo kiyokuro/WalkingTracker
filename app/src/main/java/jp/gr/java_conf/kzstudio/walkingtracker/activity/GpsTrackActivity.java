@@ -18,12 +18,19 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -35,13 +42,17 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
 import jp.gr.java_conf.kzstudio.walkingtracker.R;
 import jp.gr.java_conf.kzstudio.walkingtracker.util.GpsPoint;
+import jp.gr.java_conf.kzstudio.walkingtracker.util.JsonMaker;
+import jp.gr.java_conf.kzstudio.walkingtracker.util.UserPreference;
 
 public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, View.OnClickListener {
 
@@ -50,7 +61,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
 
     private GoogleMap mMap;
     private Marker mMaker;
-    private Context mContex;
+    private Context mContext;
 
     private LocationManager mLocationManager;
     private double mLat = 35.681382;
@@ -74,7 +85,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gps_track);
 
-        mContex = this;
+        mContext = this;
         mPoints = new ArrayList<GpsPoint>();
         mPositions = new ArrayList<LatLng>();
         mProgressView = findViewById(R.id.progress_view);
@@ -281,6 +292,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                     mRegistRouteButton.setVisibility(View.GONE);
                     mResetRouteButton.setVisibility(View.GONE);
                     getLocation();
+                    isStart = true;
                 } else {
                     isStart = false;
                     if (Build.VERSION.SDK_INT >= 23) {
@@ -309,6 +321,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 //checkPointTitle[0] = editView.getText().toString();
                                 createMarker(editView.getText().toString(), editView.getText().toString());
+                                mPoints.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, "", editView.getText().toString(), String.valueOf(mCheckPointNum)));
                             }
                         })
                         .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
@@ -317,8 +330,6 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                             }
                         })
                         .show();
-
-                mPoints.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, "", "", String.valueOf(mCheckPointNum)));
                 mCheckPointNum++;
                 isMarkerExist = true;
                 break;
@@ -333,7 +344,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 recordTitle[0] = titleEdit.getText().toString();
-                                changeActivity(recordTitle[0]);
+                                registData(recordTitle[0]);
                             }
                         })
                         .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
@@ -358,31 +369,113 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(mLat, mLon))
                 .title(title)
-                //.snippet(comment)
+                        //.snippet(comment)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
     }
 
-    private void changeActivity(String recordTitle){
-        //Intent intent = new Intent(this, DetailTrackDataActivity.class);
-        //intent.putExtra("pointsList", (Serializable) mPoints);
-        //startActivityForResult(intent, 1);
-        Calendar calendar = Calendar.getInstance();
-        String date = calendar.get(Calendar.YEAR)+"/"+(calendar.get(Calendar.MONTH)+1)+"/"+calendar.get(Calendar.DAY_OF_MONTH);
+    private void registData(final String recordTitle){
+        UserPreference userPreference = new UserPreference(mContext, "UserPref");
+        final String userId = userPreference.loadUserPreference("USER_ID");
+        TimeZone timeZone = TimeZone.getTimeZone("Asia/Tokyo");
+        Calendar calendar = Calendar.getInstance(timeZone);
+        final String date = calendar.get(Calendar.YEAR)+"/"+(calendar.get(Calendar.MONTH)+1)+"/"+calendar.get(Calendar.DAY_OF_MONTH)+"/"+calendar.get(Calendar.HOUR_OF_DAY)+":"+calendar.get(Calendar.MINUTE);
         //サーバに登録する処理を書く。登録日時も取得して送信
-        //座標点の情報はmPointのリストに格納してある。
-        finish();
+        JsonMaker jsonMaker = new JsonMaker();
+        final String stringData = jsonMaker.makeGpsPointJson(mPoints);
+
+        RequestQueue requestQueue = Volley.newRequestQueue(mContext);
+        StringRequest stringReq = new StringRequest(
+                Request.Method.POST,
+                "http://project-one.sakura.ne.jp/e-net_api/InsertGpsData.php",
+                new Response.Listener<String>() {
+                    //通信成功
+                    @Override
+                    public void onResponse(String response) {
+                        //Log.i("response",response);
+                        if(response.equals("OK")){
+
+                            finish();
+                        }else {
+                            new AlertDialog.Builder(mContext)
+                                    .setTitle("保存できませんでした")
+                                    .setMessage("もう一度保存してください")
+                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @TargetApi(Build.VERSION_CODES.M)
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    })
+                                    .show();
+                        }
+                    }
+                }
+                , new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // 通信失敗
+                new AlertDialog.Builder(mContext)
+                        .setTitle("リトライ")
+                        .setMessage("情報を再送信しますか？")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @TargetApi(Build.VERSION_CODES.M)
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                registData(recordTitle);
+                            }
+                        })
+                        .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Toast.makeText(mContext, "通信に失敗しました。", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .show();
+            }
+        }
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("RecordTitle", recordTitle);
+                params.put("Date", date);
+                params.put("GpsPointData", stringData);
+                params.put("UserId", userId);
+                return params;
+            }
+        };
+        requestQueue.add(stringReq);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        super.onActivityResult(requestCode, resultCode, data);
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+        if (keyCode == KeyEvent.KEYCODE_BACK){
+            new AlertDialog.Builder(this)
+                    .setTitle("記録を中止しますか？")
+                    .setMessage("保存する前に画面を移動すると記録が失われます")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
-        if(requestCode == 1){
-            if(resultCode == RESULT_OK){
-                finish();
-            }
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // TODO 自動生成されたメソッド・スタブ
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // TODO 自動生成されたメソッド・スタブ
+
+                        }
+                    })
+                    .show();
+
+            return true;
         }
+        return false;
     }
 }
+
 
 

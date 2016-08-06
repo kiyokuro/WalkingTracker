@@ -15,7 +15,7 @@ public class JsonParser {
 
         ArrayList<String> data = new ArrayList<>();
         try{
-            JSONArray jsonArray = new JSONArray(json);
+            JSONArray jsonArray = json.getJSONArray("data");
             for(int i=0; i<jsonArray.length(); i++){
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 data.add(i,jsonObject.getString(element));
