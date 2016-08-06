@@ -471,7 +471,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             // TODO 自動生成されたメソッド・スタブ
-                            finish();
+                            goFunctionHome();
                         }
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

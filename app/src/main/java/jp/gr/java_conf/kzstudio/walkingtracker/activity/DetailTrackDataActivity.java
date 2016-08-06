@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -247,7 +248,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                     public void onResponse(String response) {
                         Log.i("response",response.toString());
                         if(response.equals("OK")){
-                            finish();
+                            goFunctionHome();
                         }else {
                             new AlertDialog.Builder(mContext)
                                     .setTitle("削除できませんでした")
@@ -297,6 +298,21 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
         };
         requestQueue.add(stringRequest);
 
+    }
+
+    private void goFunctionHome(){
+        Intent intent = new Intent(this, FunctionHomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+        if (keyCode == KeyEvent.KEYCODE_BACK){
+            goFunctionHome();
+            return true;
+        }
+        return false;
     }
 }
 
