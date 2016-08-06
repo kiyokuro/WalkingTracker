@@ -42,6 +42,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent;
         switch (v.getId()){
             case R.id.field_list_button:
+                intent = new Intent(this,FieldListActivity.class);
+                startActivity(intent);
                 break;
             case R.id.weather_button:
                 break;
