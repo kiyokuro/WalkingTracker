@@ -26,6 +26,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -62,6 +63,8 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
     private ListView mComments;
     private Button mDeleteButton;
 
+    private String recordId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +75,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
         mDeleteButton.setOnClickListener(this);
 
         Intent intent = getIntent();
-        String recordId = intent.getStringExtra("recordId");
+        recordId = intent.getStringExtra("recordId");
         mContext = this;
         mPoints = new ArrayList<GpsPoint>();
         mMarkerList = new ArrayList<Marker>();
@@ -137,7 +140,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
         switch (v.getId()) {
             case R.id.delete_button:
                 //削除処理
-                finish();
+                deleteRecord(recordId);
                 break;
         }
     }
@@ -168,13 +171,15 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                                 createMarker(pointData[4],pointData[5],pointData[1],pointData[2]);
                             }
                         }
-                        LatLng nowArea = new LatLng(Double.parseDouble(mPoints.get(mPoints.size()-1).getLan()), Double.parseDouble(mPoints.get(mPoints.size()-1).getLon()));
 
-                        CameraPosition camerapos = new CameraPosition.Builder()
-                                .target(nowArea).zoom(18f).build();
-                        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(camerapos));
                         if(mPoints.size()<1){
                             mPoints.add(new GpsPoint("0", "0", "0", false, "データなし", "データなし", "0"));
+                        }else {
+                            LatLng nowArea = new LatLng(Double.parseDouble(mPoints.get(mPoints.size()-1).getLan()), Double.parseDouble(mPoints.get(mPoints.size()-1).getLon()));
+
+                            CameraPosition camerapos = new CameraPosition.Builder()
+                                    .target(nowArea).zoom(18f).build();
+                            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(camerapos));
                         }
                         showCommentList();
                     }
@@ -228,6 +233,70 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                 //コメントをタップした時に対応するマーカーの色を変えたりできるといい
             }
         });
+    }
+
+    private void deleteRecord(final String recordId) {
+        String url = "http://project-one.sakura.ne.jp/e-net_api/DeleteGpsData.php?RecordId="+recordId;
+        RequestQueue requestQueue = Volley.newRequestQueue(mContext);
+        StringRequest stringRequest =new StringRequest(
+                Request.Method.GET,
+                url,
+                new Response.Listener<String>() {
+                    //通信成功
+                    @Override
+                    public void onResponse(String response) {
+                        Log.i("response",response.toString());
+                        if(response.equals("OK")){
+                            finish();
+                        }else {
+                            new AlertDialog.Builder(mContext)
+                                    .setTitle("削除できませんでした")
+                                    .setMessage("削除できませんでした")
+                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @TargetApi(Build.VERSION_CODES.M)
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    })
+                                    .show();
+                        }
+                    }
+                }
+                ,new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // 通信失敗
+                new AlertDialog.Builder(mContext)
+                        .setTitle("リトライ")
+                        .setMessage("もう一度実行しますか？")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @TargetApi(Build.VERSION_CODES.M)
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                getGPSPointList(recordId);
+                            }
+                        })
+                        .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //findViewById(R.id.loadview).setVisibility(View.GONE);
+                                Toast.makeText(mContext,"削除できませんでした。",Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .show();
+            }
+        }
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("recordId", recordId);//パラメータ追加
+                return params;
+            }
+        };
+        requestQueue.add(stringRequest);
+
     }
 }
 
