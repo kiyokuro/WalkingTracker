@@ -49,6 +49,7 @@
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"/>
         <activity android:name=".activity.SettingActivity"/>
+        <activity android:name=".activity.FieldListActivity"/>
     </application>
 
 </manifest>
