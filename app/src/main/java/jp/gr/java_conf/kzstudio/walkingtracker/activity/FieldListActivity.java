@@ -3,6 +3,7 @@ package jp.gr.java_conf.kzstudio.walkingtracker.activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -49,5 +50,15 @@ public class FieldListActivity extends AppCompatActivity{
         String userName = userPreference.loadUserPreference("USER_ID");
         String passWord = userPreference.loadUserPreference("USER_PASSWORD");
         webView.loadUrl("https://project-one.sakura.ne.jp/app/list.php?username="+userName+"&password="+passWord);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && webView.canGoBack()) {
+            webView.goBack();
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 }
