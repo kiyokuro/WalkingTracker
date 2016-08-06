@@ -34,11 +34,13 @@ public class FieldListActivity extends AppCompatActivity{
             //ページの読み込み開始
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                findViewById(R.id.loadview).setVisibility(View.VISIBLE);
             }
 
             //ページの読み込み完了
             @Override
             public void onPageFinished(WebView view, String url) {
+                findViewById(R.id.loadview).setVisibility(view.GONE);
             }
 
             //ページの読み込み失敗
