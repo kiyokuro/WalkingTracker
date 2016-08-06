@@ -109,7 +109,7 @@ public class LoginActivity extends Activity implements View.OnClickListener{
                 // 通信失敗
                 new AlertDialog.Builder(mContext)
                         .setTitle("リトライ")
-                        .setMessage("情報を再取得しますか？")
+                        .setMessage("通信に失敗しました。情報を再取得しますか？")
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @TargetApi(Build.VERSION_CODES.M)
                             @Override

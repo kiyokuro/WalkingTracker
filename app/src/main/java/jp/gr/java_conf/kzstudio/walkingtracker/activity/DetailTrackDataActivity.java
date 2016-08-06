@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -123,6 +124,13 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
         }
     }
 
+    private void createMarker(String title, String comment, String lan, String lon){
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(Double.parseDouble(lan), Double.parseDouble(lon)))
+                .title(comment)
+                        //.snippet(comment)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+    }
 
     @Override
     public void onClick(View v) {
@@ -139,7 +147,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
      * GPSの座標リストを取得する
      */
     private void getGPSPointList(final String recordId) {
-        String url = "APIのURLを記入";
+        String url = "http://project-one.sakura.ne.jp/e-net_api/SelectGpsDataDetail.php?RecordId="+recordId;
         RequestQueue requestQueue = Volley.newRequestQueue(mContext);
         JsonObjectRequest jsonObjReq =new JsonObjectRequest(
                 Request.Method.POST,
@@ -149,17 +157,24 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                     //通信成功
                     @Override
                     public void onResponse(JSONObject response) {
+                        Log.i("response",response.toString());
                         JsonParser jsonParser = new JsonParser();
-                        ArrayList<String> lanList= jsonParser.parseObject(response, "lan");//下4つの名前はAPIに合わせて適宜変更
-                        ArrayList<String> lonList= jsonParser.parseObject(response, "lon");
-                        ArrayList<String> markerExistList = jsonParser.parseObject(response, "makerExist");
-                        ArrayList<String> commentList= jsonParser.parseObject(response, "comment");
-                        for(int i=0; i<lanList.size(); i++) {
-                            //マーカーがついていた座標点だけのリストを作成
-                            if(markerExistList.get(i).equals("true")) {
-                                mPoints.add(new GpsPoint(String.valueOf(i), lanList.get(i), lonList.get(i), true, "",
-                                        commentList.get(i), String.valueOf(i)));
+                        String trackData = jsonParser.getTrackData(response, "track_data");
+                        String[] datas = trackData.split(",", 0);
+                        for(int i=0; i<datas.length; i++){
+                            String[] pointData = datas[i].split("@",-1);
+                            if(pointData[3].equals("true")){
+                                mPoints.add(new GpsPoint(pointData[0],pointData[1],pointData[2],true,pointData[4],pointData[5],pointData[6]));
+                                createMarker(pointData[4],pointData[5],pointData[1],pointData[2]);
                             }
+                        }
+                        LatLng nowArea = new LatLng(Double.parseDouble(mPoints.get(mPoints.size()-1).getLan()), Double.parseDouble(mPoints.get(mPoints.size()-1).getLon()));
+
+                        CameraPosition camerapos = new CameraPosition.Builder()
+                                .target(nowArea).zoom(18f).build();
+                        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(camerapos));
+                        if(mPoints.size()<1){
+                            mPoints.add(new GpsPoint("0", "0", "0", false, "データなし", "データなし", "0"));
                         }
                         showCommentList();
                     }
@@ -202,7 +217,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
     private void showCommentList(){
         mComments = (ListView)findViewById(R.id.comment_list);
 
-        GPSPointListAdapter adapter = new GPSPointListAdapter(this,R.layout.item_record_listview,mPoints);
+        GPSPointListAdapter adapter = new GPSPointListAdapter(this,R.layout.item_comment_pos,mPoints);
         mComments.setAdapter(adapter);
 
         mComments.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -220,14 +235,12 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
     private LayoutInflater inflater;
     private int resourceId;
     private List<GpsPoint> item;
-    private Map<Integer, View> positionView;
 
     public GPSPointListAdapter(Context context, int resourceId, List<GpsPoint> item){
         super(context, resourceId, item);
         this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.resourceId = resourceId;
         this.item = item;
-        positionView = new HashMap<Integer, View>();
     }
 
     @Override
@@ -246,18 +259,12 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
         TextView lon = (TextView)view.findViewById(R.id.lon);
 
         GpsPoint item = this.item.get(position);
-        order.setText(item.getOrder());
+        order.setText(item.getCheckPointNum());
         comment.setText(item.getComment());
         lan.setText("緯度："+item.getLan());
         lon.setText("軽度：" + item.getLon());
 
-        positionView.put(position, view);
-
         return view;
-    }
-
-    public View getPositionView(int targetPosition){
-        return positionView.get(targetPosition);
     }
 
     @Override
