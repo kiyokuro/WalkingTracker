@@ -96,7 +96,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         //drawPolyline(mMap, mPositions);
-        drawMarker();
+        /*drawMarker();
         if(mPoints.size()<1){
             return;
         }
@@ -104,6 +104,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                 .target(new LatLng(Double.parseDouble(mPoints.get(0).getLan()), Double.parseDouble(mPoints.get(0).getLon())))
                 .zoom(16f).build();
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(camerapos));
+        */
     }
 
     /*void drawPolyline(GoogleMap googleMap, List<LatLng> positions) {
@@ -117,7 +118,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
         googleMap.addPolyline(fillOptions);
     }*/
 
-    void drawMarker(){
+    /*void drawMarker(){
         for(int i = 0; i < mPoints.size(); i++) {
             Marker marker;
             marker = mMap.addMarker(new MarkerOptions()
@@ -125,16 +126,17 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                     .title(String.valueOf(i))
                     .snippet(mPoints.get(i).getComment()));
-            mMarkerList.add(marker);
+
         }
-    }
+    }*/
 
     private void createMarker(String title, String comment, String lan, String lon){
-        mMap.addMarker(new MarkerOptions()
+        Marker marker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(Double.parseDouble(lan), Double.parseDouble(lon)))
                 .title(comment)
                         //.snippet(comment)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        mMarkerList.add(marker);
     }
 
     private void moveCamera(double lan, double lon){
@@ -143,6 +145,10 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
         CameraPosition camerapos = new CameraPosition.Builder()
                 .target(nowArea).zoom(18f).build();
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(camerapos));
+    }
+
+    private void showMakerWindow(int markerListIndex){
+        mMarkerList.get(markerListIndex).showInfoWindow();
     }
 
     @Override
@@ -258,6 +264,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                 double lan = Double.parseDouble(mPoints.get(pos).getLan());
                 double lon = Double.parseDouble(mPoints.get(pos).getLon());
                 moveCamera(lan, lon);
+                showMakerWindow(pos);
             }
         });
     }
