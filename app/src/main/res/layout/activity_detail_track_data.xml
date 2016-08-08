@@ -25,8 +25,19 @@
             tools:context="com.dreampharos.activity.GpsTrackActivity"
             android:name="com.google.android.gms.maps.SupportMapFragment" />
 
-
-
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="記録一覧"
+            android:textStyle="bold"
+            android:textSize="30dp"
+            android:gravity="bottom"
+            android:layout_marginLeft="10dp"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#4CAF50" />
         <ListView
             android:id="@+id/comment_list"
             android:layout_width="match_parent"

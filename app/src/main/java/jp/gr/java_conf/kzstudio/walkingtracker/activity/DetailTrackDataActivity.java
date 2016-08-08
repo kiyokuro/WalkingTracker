@@ -39,6 +39,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -136,12 +137,35 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
     }
 
+    private void moveCamera(double lan, double lon){
+        LatLng nowArea = new LatLng(lan, lon);
+
+        CameraPosition camerapos = new CameraPosition.Builder()
+                .target(nowArea).zoom(18f).build();
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(camerapos));
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.delete_button:
                 //削除処理
-                deleteRecord(recordId);
+                new AlertDialog.Builder(mContext)
+                        .setTitle("この記録を削除しますか？")
+                        .setMessage("削除すると記録は復元できません。削除しますか？")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @TargetApi(Build.VERSION_CODES.M)
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                deleteRecord(recordId);
+                            }
+                        })
+                        .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .show();
                 break;
         }
     }
@@ -153,17 +177,22 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
     private void getGPSPointList(final String recordId) {
         String url = "http://project-one.sakura.ne.jp/e-net_api/SelectGpsDataDetail.php";
         RequestQueue requestQueue = Volley.newRequestQueue(mContext);
-        JsonObjectRequest jsonObjReq =new JsonObjectRequest(
+        StringRequest stringRequest =new StringRequest(
                 Request.Method.POST,
                 url,
-                null,
-                new Response.Listener<JSONObject>() {
+                new Response.Listener<String>() {
                     //通信成功
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(String response) {
                         Log.i("response",response.toString());
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(response);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                         JsonParser jsonParser = new JsonParser();
-                        String trackData = jsonParser.getTrackData(response, "track_data");
+                        String trackData = jsonParser.getTrackData(jsonObject, "track_data");
                         String[] datas = trackData.split(",", 0);
                         for(int i=0; i<datas.length; i++){
                             String[] pointData = datas[i].split("@",-1);
@@ -176,11 +205,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                         if(mPoints.size()<1){
                             mPoints.add(new GpsPoint("0", "0", "0", false, "データなし", "データなし", "0"));
                         }else {
-                            LatLng nowArea = new LatLng(Double.parseDouble(mPoints.get(mPoints.size()-1).getLan()), Double.parseDouble(mPoints.get(mPoints.size()-1).getLon()));
-
-                            CameraPosition camerapos = new CameraPosition.Builder()
-                                    .target(nowArea).zoom(18f).build();
-                            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(camerapos));
+                            moveCamera(Double.parseDouble(mPoints.get(mPoints.size()-1).getLan()), Double.parseDouble(mPoints.get(mPoints.size()-1).getLon()));
                         }
                         showCommentList();
                     }
@@ -202,7 +227,6 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                         .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                //findViewById(R.id.loadview).setVisibility(View.GONE);
                                 Toast.makeText(mContext,"情報を取得できませんでした。",Toast.LENGTH_SHORT).show();
                             }
                         })
@@ -213,11 +237,11 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("recordId", recordId);//パラメータ追加
+                params.put("RecordId", recordId);//パラメータ追加
                 return params;
             }
         };
-        requestQueue.add(jsonObjReq);
+        requestQueue.add(stringRequest);
 
     }
     private void showCommentList(){
@@ -231,7 +255,9 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int pos = (int) parent.getItemIdAtPosition(position);
                 String recordId = mPoints.get(pos).getOrder();
-                //コメントをタップした時に対応するマーカーの色を変えたりできるといい
+                double lan = Double.parseDouble(mPoints.get(pos).getLan());
+                double lon = Double.parseDouble(mPoints.get(pos).getLon());
+                moveCamera(lan, lon);
             }
         });
     }
@@ -292,7 +318,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("recordId", recordId);//パラメータ追加
+                params.put("RecordId", recordId);//パラメータ追加
                 return params;
             }
         };

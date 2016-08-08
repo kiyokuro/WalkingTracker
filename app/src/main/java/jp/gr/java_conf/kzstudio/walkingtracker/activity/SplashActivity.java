@@ -76,7 +76,7 @@ public class SplashActivity extends Activity {
 	}
 
 	private void apiForLogin(final String userId, final String userPassword) {
-		String url = "http://project-one.sakura.ne.jp/app/system/ajax.login.php";
+		String url = "https://project-one.sakura.ne.jp/app/system/ajax.login.php";
 		RequestQueue requestQueue = Volley.newRequestQueue(mContext);
 		StringRequest jsonObjReq = new StringRequest(
 				Request.Method.POST,
