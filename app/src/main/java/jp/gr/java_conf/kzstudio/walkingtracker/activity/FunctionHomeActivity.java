@@ -154,6 +154,7 @@ public class FunctionHomeActivity extends AppCompatActivity {
         Intent intent = new Intent(this, DetailTrackDataActivity.class);
         intent.putExtra("recordId", recordId);
         startActivity(intent);
+        finish();
     }
 }
 
