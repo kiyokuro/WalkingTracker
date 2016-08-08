@@ -44,7 +44,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         webView = (WebView)findViewById(R.id.web_view);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setAppCacheEnabled(true);
-        webView.getSettings().setAppCachePath("/WalkingTracker");
+        //webView.getSettings().setAppCachePath("/WalkingTracker");
         webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         webView.setWebViewClient(new WebViewClient() {
             //ページの読み込み開始
@@ -79,6 +79,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
                 break;
             case R.id.weather_button:
+                intent = new Intent(this,WeekWeatherActivity.class);
+                startActivity(intent);
                 break;
             case R.id.walking_track_button:
                 intent = new Intent(this,FunctionHomeActivity.class);

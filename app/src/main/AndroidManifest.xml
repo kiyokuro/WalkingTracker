@@ -51,6 +51,7 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".activity.SettingActivity"/>
         <activity android:name=".activity.FieldListActivity"/>
+        <activity android:name=".activity.WeekWeatherActivity"/>
     </application>
 
 </manifest>
