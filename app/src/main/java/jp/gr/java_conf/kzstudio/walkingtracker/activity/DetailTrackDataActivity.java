@@ -151,7 +151,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
      * GPSの座標リストを取得する
      */
     private void getGPSPointList(final String recordId) {
-        String url = "http://project-one.sakura.ne.jp/e-net_api/SelectGpsDataDetail.php?RecordId="+recordId;
+        String url = "http://project-one.sakura.ne.jp/e-net_api/SelectGpsDataDetail.php";
         RequestQueue requestQueue = Volley.newRequestQueue(mContext);
         JsonObjectRequest jsonObjReq =new JsonObjectRequest(
                 Request.Method.POST,
@@ -237,10 +237,10 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
     }
 
     private void deleteRecord(final String recordId) {
-        String url = "http://project-one.sakura.ne.jp/e-net_api/DeleteGpsData.php?RecordId="+recordId;
+        String url = "http://project-one.sakura.ne.jp/e-net_api/DeleteGpsData.php";
         RequestQueue requestQueue = Volley.newRequestQueue(mContext);
         StringRequest stringRequest =new StringRequest(
-                Request.Method.GET,
+                Request.Method.POST,
                 url,
                 new Response.Listener<String>() {
                     //通信成功
