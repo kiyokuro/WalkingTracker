@@ -126,7 +126,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
 
             } else {
                 Toast toast = Toast.makeText(this,
-                        "現在地の天気を検索するために、GPSの使用を許可してください", Toast.LENGTH_LONG);
+                        "あなたの位置情報を利用するため、GPSの使用を許可してください", Toast.LENGTH_LONG);
                 toast.show();
 
                 ActivityCompat.requestPermissions(this,
@@ -153,7 +153,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         .findFragmentById(R.id.map);
                 mapFragment.getMapAsync(this);
             } else {
-                Toast toast = Toast.makeText(this, "アプリは実行できません", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(this, "見回り記録は実行できません", Toast.LENGTH_SHORT);
                 toast.show();
             }
         }
