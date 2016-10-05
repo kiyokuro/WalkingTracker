@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -38,6 +39,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,6 +63,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
     private ArrayList<GpsPoint> mPoints;
     private ArrayList<Marker> mMarkerList;
     private GPSPointListAdapter mGpsPointListAdapter;
+    private ArrayList<LatLng> mLatLngs;
 
     private ListView mComments;
     private Button mDeleteButton;
@@ -81,6 +84,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
         mContext = this;
         mPoints = new ArrayList<GpsPoint>();
         mMarkerList = new ArrayList<Marker>();
+        mLatLngs = new ArrayList<>();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -107,7 +111,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
         */
     }
 
-    /*void drawPolyline(GoogleMap googleMap, List<LatLng> positions) {
+    void drawPolyline(GoogleMap googleMap, List<LatLng> positions) {
         int fillColor = ContextCompat.getColor(this, R.color.polylineFillColor);
 
         PolylineOptions fillOptions = new PolylineOptions()
@@ -116,7 +120,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                 .addAll(positions);
 
         googleMap.addPolyline(fillOptions);
-    }*/
+    }
 
     /*void drawMarker(){
         for(int i = 0; i < mPoints.size(); i++) {
@@ -202,15 +206,21 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                         String[] datas = trackData.split(",", 0);
                         for(int i=0; i<datas.length; i++){
                             String[] pointData = datas[i].split("@",-1);
+                            //記録されている位置情報のうち、チェックポイントに登録されているものだけ取得したリストを作成
                             if(pointData[3].equals("true")){
                                 mPoints.add(new GpsPoint(pointData[0],pointData[1],pointData[2],true,pointData[4],pointData[5],pointData[6]));
                                 createMarker(pointData[4],pointData[5],pointData[1],pointData[2]);
                             }
+                            //記録されている位置情報をからリストを作成。移動経路をラインとして見せるために利用
+                            mLatLngs.add(new LatLng(Double.parseDouble(pointData[1]),Double.parseDouble(pointData[2])));
                         }
 
                         if(mPoints.size()<1){
                             mPoints.add(new GpsPoint("0", "0", "0", false, "データなし", "データなし", "0"));
                         }else {
+                            //位置情報を全てつないだラインを地図上に描画する
+                            drawPolyline(mMap, mLatLngs);
+                            //カメラを最後のチェックポイント追加地点に移動させる。
                             moveCamera(Double.parseDouble(mPoints.get(mPoints.size()-1).getLan()), Double.parseDouble(mPoints.get(mPoints.size()-1).getLon()));
                         }
                         showCommentList();
