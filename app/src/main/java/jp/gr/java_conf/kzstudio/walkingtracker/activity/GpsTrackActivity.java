@@ -17,7 +17,6 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -51,7 +50,6 @@ import java.util.TimeZone;
 
 import jp.gr.java_conf.kzstudio.walkingtracker.R;
 import jp.gr.java_conf.kzstudio.walkingtracker.util.GpsPoint;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.JsonMaker;
 import jp.gr.java_conf.kzstudio.walkingtracker.util.UserPreference;
 
 public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, View.OnClickListener {
@@ -66,7 +64,9 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
     private LocationManager mLocationManager;
     private double mLat = 35.681382;
     private double mLon = 139.766084;
-    private List<GpsPoint> mPoints;
+    //DBに登録するために記録する座標などの情報
+    private List<GpsPoint> mCheckPointPosition;
+    //線を引くために取得する座標
     private List<LatLng> mPositions;
     private int mCount = 0;
     private int mCheckPointNum = 1;
@@ -86,7 +86,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         setContentView(R.layout.activity_gps_track);
 
         mContext = this;
-        mPoints = new ArrayList<GpsPoint>();
+        mCheckPointPosition = new ArrayList<GpsPoint>();
         mPositions = new ArrayList<LatLng>();
         mProgressView = findViewById(R.id.progress_view);
         mProgressView.setVisibility(View.GONE);
@@ -191,8 +191,8 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 return;
             }
         }
-        //GPSの取得間隔の設定 3000ms && 3m
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 3, this);
+        //GPSの取得間隔の設定 3000ms && 2m
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 2, this);
     }
 
 
@@ -262,7 +262,13 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         mCount++;
         isMarkerExist = false;
         isStart = true;
-        mPoints.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), false, " ", " ", " "));
+
+        //初めての座標取得ならその地点をスタート地点とする
+        if(mCheckPointPosition.size()<1){
+            mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", "スタート", " "));
+        }else {
+            mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), false, " ", " ", " "));
+        }
         showNowLocation();
         drawPolyline(mMap, mPositions);
     }
@@ -322,7 +328,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 //checkPointTitle[0] = editView.getText().toString();
                                 createMarker(editView.getText().toString(), editView.getText().toString());
-                                mPoints.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", editView.getText().toString(), String.valueOf(mCheckPointNum)));
+                                mCheckPointPosition.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", editView.getText().toString(), String.valueOf(mCheckPointNum)));
                                 mCheckPointNum++;
                             }
                         })
@@ -339,11 +345,14 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 final String[] recordTitle = {""};
                 new AlertDialog.Builder(GpsTrackActivity.this)
                         .setIcon(android.R.drawable.ic_dialog_info)
-                        .setTitle("この記録にタイトルをつけてください。ない場合は自動で日付になります。")
+                        .setTitle("この記録にタイトルをつけてください。タイトルをつけない場合は自動で日付になります。")
                         .setCancelable(false)
                         .setView(titleEdit)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
+                                //ゴール地点を作成のマーカを作る
+                                mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", "エンド", " "));
+
                                 TimeZone timeZone = TimeZone.getTimeZone("Asia/Tokyo");
                                 Calendar calendar = Calendar.getInstance(timeZone);
                                 final String date = calendar.get(Calendar.YEAR)+"/"+(calendar.get(Calendar.MONTH)+1)+"/"+calendar.get(Calendar.DAY_OF_MONTH)+"/"+calendar.get(Calendar.HOUR_OF_DAY)+":"+calendar.get(Calendar.MINUTE);
@@ -368,7 +377,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 mCount = 0;
                 mCheckPointNum = 1;
                 isMarkerExist = false;
-                mPoints.clear();
+                mCheckPointPosition.clear();
                 mPositions.clear();
         }
     }
@@ -381,12 +390,13 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
     }
 
+    //DB記録ようのデータを送信できるようにString型に加工する
     private String makeStringData(List<GpsPoint> list){
         String stringData = "";
-        for(int i=0; i<mPoints.size(); i++){
-            stringData += mPoints.get(i).getOrder()+"@"+mPoints.get(i).getLan()+"@"+mPoints.get(i).getLon()+"@"+
-                    String.valueOf(mPoints.get(i).isMarkerExist())+"@"+mPoints.get(i).getTitle()+"@"+
-                    mPoints.get(i).getComment() + "@" + mPoints.get(i).getCheckPointNum()+",";
+        for(int i = 0; i< mCheckPointPosition.size(); i++){
+            stringData += mCheckPointPosition.get(i).getOrder()+"@"+ mCheckPointPosition.get(i).getLan()+"@"+ mCheckPointPosition.get(i).getLon()+"@"+
+                    String.valueOf(mCheckPointPosition.get(i).isMarkerExist())+"@"+ mCheckPointPosition.get(i).getTitle()+"@"+
+                    mCheckPointPosition.get(i).getComment() + "@" + mCheckPointPosition.get(i).getCheckPointNum()+",";
         }
         return stringData;
     }
@@ -396,7 +406,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         final String userId = userPreference.loadUserPreference("USER_ID");
 
         //サーバに登録する処理を書く。登録日時も取得して送信
-        final String stringData = makeStringData(mPoints);
+        final String stringData = makeStringData(mCheckPointPosition);
 
         RequestQueue requestQueue = Volley.newRequestQueue(mContext);
         StringRequest stringReq = new StringRequest(
@@ -429,8 +439,8 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
             public void onErrorResponse(VolleyError error) {
                 // 通信失敗
                 new AlertDialog.Builder(mContext)
-                        .setTitle("リトライ")
-                        .setMessage("情報を再送信しますか？")
+                        .setTitle("情報を登録できませんでした")
+                        .setMessage("インターネット接続を確認してください。再度登録するには「OK」を押してください。")
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @TargetApi(Build.VERSION_CODES.M)
                             @Override

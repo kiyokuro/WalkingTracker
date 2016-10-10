@@ -18,7 +18,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,7 +26,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -63,7 +61,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
     private GoogleMap mMap;
     private Context mContext;
 
-    private ArrayList<GpsPoint> mPoints;
+    private ArrayList<GpsPoint> mCheckPointPosition;
     private ArrayList<Marker> mMarkerList;
     private GPSPointListAdapter mGpsPointListAdapter;
     private ArrayList<LatLng> mLatLngs;
@@ -85,7 +83,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
         Intent intent = getIntent();
         recordId = intent.getStringExtra("recordId");
         mContext = this;
-        mPoints = new ArrayList<GpsPoint>();
+        mCheckPointPosition = new ArrayList<GpsPoint>();
         mMarkerList = new ArrayList<Marker>();
         mLatLngs = new ArrayList<>();
 
@@ -94,7 +92,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //mPoints = (ArrayList<GpsPoint>)intent.getSerializableExtra("pointsList");
+        //mCheckPointPosition = (ArrayList<GpsPoint>)intent.getSerializableExtra("pointsList");
         //サーバからバスコースの情報を取得する。
         getGPSPointList(recordId);
     }
@@ -104,11 +102,11 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
         mMap = googleMap;
         //drawPolyline(mMap, mPositions);
         /*drawMarker();
-        if(mPoints.size()<1){
+        if(mCheckPointPosition.size()<1){
             return;
         }
         CameraPosition camerapos = new CameraPosition.Builder()
-                .target(new LatLng(Double.parseDouble(mPoints.get(0).getLan()), Double.parseDouble(mPoints.get(0).getLon())))
+                .target(new LatLng(Double.parseDouble(mCheckPointPosition.get(0).getLan()), Double.parseDouble(mCheckPointPosition.get(0).getLon())))
                 .zoom(16f).build();
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(camerapos));
         */
@@ -126,13 +124,13 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
     }
 
     /*void drawMarker(){
-        for(int i = 0; i < mPoints.size(); i++) {
+        for(int i = 0; i < mCheckPointPosition.size(); i++) {
             Marker marker;
             marker = mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(Double.parseDouble(mPoints.get(i).getLan()), Double.parseDouble(mPoints.get(i).getLon())))
+                    .position(new LatLng(Double.parseDouble(mCheckPointPosition.get(i).getLan()), Double.parseDouble(mCheckPointPosition.get(i).getLon())))
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                     .title(String.valueOf(i))
-                    .snippet(mPoints.get(i).getComment()));
+                    .snippet(mCheckPointPosition.get(i).getComment()));
 
         }
     }*/
@@ -211,20 +209,20 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                             String[] pointData = datas[i].split("@",-1);
                             //記録されている位置情報のうち、チェックポイントに登録されているものだけ取得したリストを作成
                             if(pointData[3].equals("true")){
-                                mPoints.add(new GpsPoint(pointData[0],pointData[1],pointData[2],true,pointData[4],pointData[5],pointData[6]));
+                                mCheckPointPosition.add(new GpsPoint(pointData[0],pointData[1],pointData[2],true,pointData[4],pointData[5],pointData[6]));
                                 createMarker(pointData[4],pointData[5],pointData[1],pointData[2]);
                             }
                             //記録されている位置情報をからリストを作成。移動経路をラインとして見せるために利用
                             mLatLngs.add(new LatLng(Double.parseDouble(pointData[1]),Double.parseDouble(pointData[2])));
                         }
 
-                        if(mPoints.size()<1){
-                            mPoints.add(new GpsPoint("0", "0", "0", false, "データなし", "データなし", "0"));
+                        if(mCheckPointPosition.size()<1){
+                            mCheckPointPosition.add(new GpsPoint("0", "0", "0", false, "データなし", "データなし", "0"));
                         }else {
                             //位置情報を全てつないだラインを地図上に描画する
                             drawPolyline(mMap, mLatLngs);
                             //カメラを最後のチェックポイント追加地点に移動させる。
-                            moveCamera(Double.parseDouble(mPoints.get(mPoints.size()-1).getLan()), Double.parseDouble(mPoints.get(mPoints.size()-1).getLon()));
+                            moveCamera(Double.parseDouble(mCheckPointPosition.get(mCheckPointPosition.size()-1).getLan()), Double.parseDouble(mCheckPointPosition.get(mCheckPointPosition.size()-1).getLon()));
                         }
                         showCommentList();
                     }
@@ -266,16 +264,16 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
     private void showCommentList(){
         mComments = (ListView)findViewById(R.id.comment_list);
 
-        GPSPointListAdapter adapter = new GPSPointListAdapter(this,R.layout.item_comment_pos,mPoints);
+        GPSPointListAdapter adapter = new GPSPointListAdapter(this,R.layout.item_comment_pos, mCheckPointPosition);
         mComments.setAdapter(adapter);
 
         mComments.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int pos = (int) parent.getItemIdAtPosition(position);
-                String recordId = mPoints.get(pos).getOrder();
-                double lan = Double.parseDouble(mPoints.get(pos).getLan());
-                double lon = Double.parseDouble(mPoints.get(pos).getLon());
+                String recordId = mCheckPointPosition.get(pos).getOrder();
+                double lan = Double.parseDouble(mCheckPointPosition.get(pos).getLan());
+                double lon = Double.parseDouble(mCheckPointPosition.get(pos).getLon());
                 moveCamera(lan, lon);
                 showMakerWindow(pos);
             }
