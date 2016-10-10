@@ -57,6 +57,9 @@ import jp.gr.java_conf.kzstudio.walkingtracker.util.JsonParser;
  * Created by kiyokazu on 16/04/11.
  */
 public class DetailTrackDataActivity extends FragmentActivity implements OnMapReadyCallback, OnClickListener{
+
+    private static final float POLYLINE_WIDTH_IN_PIXELS = 6;
+
     private GoogleMap mMap;
     private Context mContext;
 
@@ -115,7 +118,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
         int fillColor = ContextCompat.getColor(this, R.color.polylineFillColor);
 
         PolylineOptions fillOptions = new PolylineOptions()
-                .width(20)
+                .width(POLYLINE_WIDTH_IN_PIXELS)
                 .color(fillColor)
                 .addAll(positions);
 

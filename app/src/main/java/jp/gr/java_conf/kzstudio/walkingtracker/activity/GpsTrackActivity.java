@@ -191,6 +191,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 return;
             }
         }
+        //GPSの取得間隔の設定 3000ms && 3m
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 3, this);
     }
 
@@ -236,7 +237,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         int fillColor = ContextCompat.getColor(this, R.color.polylineFillColor);
 
         PolylineOptions fillOptions = new PolylineOptions()
-                .width(POLYLINE_WIDTH_IN_PIXELS * 2)
+                .width(POLYLINE_WIDTH_IN_PIXELS)
                 .color(fillColor)
                 .addAll(positions);
 
@@ -343,8 +344,15 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         .setView(titleEdit)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
+                                TimeZone timeZone = TimeZone.getTimeZone("Asia/Tokyo");
+                                Calendar calendar = Calendar.getInstance(timeZone);
+                                final String date = calendar.get(Calendar.YEAR)+"/"+(calendar.get(Calendar.MONTH)+1)+"/"+calendar.get(Calendar.DAY_OF_MONTH)+"/"+calendar.get(Calendar.HOUR_OF_DAY)+":"+calendar.get(Calendar.MINUTE);
                                 recordTitle[0] = titleEdit.getText().toString();
-                                registData(recordTitle[0]);
+                                //タイトルが空の場合に、タイトルを日付で自動生成する
+                                if(recordTitle[0].equals("")){
+                                    recordTitle[0] = date+"の記録";
+                                }
+                                registData(recordTitle[0], date);
                             }
                         })
                         .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
@@ -383,12 +391,10 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         return stringData;
     }
 
-    private void registData(final String recordTitle){
+    private void registData(final String recordTitle, final String date){
         UserPreference userPreference = new UserPreference(mContext, "UserPref");
         final String userId = userPreference.loadUserPreference("USER_ID");
-        TimeZone timeZone = TimeZone.getTimeZone("Asia/Tokyo");
-        Calendar calendar = Calendar.getInstance(timeZone);
-        final String date = calendar.get(Calendar.YEAR)+"/"+(calendar.get(Calendar.MONTH)+1)+"/"+calendar.get(Calendar.DAY_OF_MONTH)+"/"+calendar.get(Calendar.HOUR_OF_DAY)+":"+calendar.get(Calendar.MINUTE);
+
         //サーバに登録する処理を書く。登録日時も取得して送信
         final String stringData = makeStringData(mPoints);
 
@@ -429,7 +435,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                             @TargetApi(Build.VERSION_CODES.M)
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                registData(recordTitle);
+                                registData(recordTitle, date);
                             }
                         })
                         .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
