@@ -265,9 +265,9 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
 
         //初めての座標取得ならその地点をスタート地点とする
         if(mCheckPointPosition.size()<1){
-            mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", "スタート", " "));
+            mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", "スタート", " ", false));
         }else {
-            mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), false, " ", " ", " "));
+            mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), false, " ", " ", " ", false));
         }
         showNowLocation();
         drawPolyline(mMap, mPositions);
@@ -318,7 +318,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 if(!isStart || isMarkerExist){
                     return;
                 }
-                final EditText editView = new EditText(this);
+                /*final EditText editView = new EditText(this);
                 new AlertDialog.Builder(GpsTrackActivity.this)
                         .setIcon(android.R.drawable.ic_dialog_info)
                         .setTitle("このポイントの記録事項を記入してください。")
@@ -337,7 +337,12 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                                 return;
                             }
                         })
-                        .show();
+                        .show();*/
+
+                Intent intent = new Intent(this, MakeCheckpointActivity.class);
+                intent.putExtra("latlng",String.valueOf(mLat+mLon));
+                startActivityForResult(intent, 1);
+
                 isMarkerExist = true;
                 break;
             case R.id.regist_route_button:
@@ -351,7 +356,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 //ゴール地点を作成のマーカを作る
-                                mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", "エンド", " "));
+                                mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", "エンド", " ", false));
 
                                 TimeZone timeZone = TimeZone.getTimeZone("Asia/Tokyo");
                                 Calendar calendar = Calendar.getInstance(timeZone);
@@ -379,6 +384,18 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 isMarkerExist = false;
                 mCheckPointPosition.clear();
                 mPositions.clear();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        Bundle bundle = data.getExtras();
+
+        if (resultCode == RESULT_OK){
+            createMarker(bundle.getString("title"), bundle.getString("comment"));
+            mCheckPointPosition.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", bundle.getString("title"), String.valueOf(mCheckPointNum), true));
+            mCheckPointNum++;
         }
     }
 

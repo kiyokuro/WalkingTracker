@@ -8,24 +8,40 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/comment_order"
-            android:layout_width="0dp"
-            android:layout_weight="0.5"
+        <LinearLayout
             android:layout_height="wrap_content"
-            android:text="1"
-            android:textSize="20dp"
-            android:gravity="center"
-            android:layout_marginTop="10dp"/>
-
-        <TextView
-            android:id="@+id/comment"
             android:layout_width="0dp"
             android:layout_weight="7"
-            android:layout_height="wrap_content"
-            android:text="ローソンの前"
-            android:textSize="20dp"
-            android:layout_marginTop="10dp"/>
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_weight="7"
+                android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/comment_order"
+                        android:layout_width="0dp"
+                        android:layout_weight="0.5"
+                        android:layout_height="wrap_content"
+                        android:text="1"
+                        android:textSize="20dp"
+                        android:gravity="center"
+                        android:layout_marginTop="10dp"/>
+
+                    <TextView
+                        android:id="@+id/comment"
+                        android:layout_width="0dp"
+                        android:layout_weight="7"
+                        android:layout_height="wrap_content"
+                        android:text="ローソンの前"
+                        android:textSize="20dp"
+                        android:layout_marginTop="10dp"/>
+                </LinearLayout>
+            <com.android.volley.toolbox.NetworkImageView
+                android:id="@+id/checkpoint_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
         <LinearLayout
             android:layout_height="wrap_content"
             android:layout_width="0dp"

@@ -13,8 +13,9 @@ public class GpsPoint implements Serializable {
     String title = "";
     String comment = "";
     String checkPointNum;
+    boolean photoExist;
 
-    public GpsPoint(String order, String lan, String lon, boolean markerExist, String title, String comment, String checkPointNum){
+    public GpsPoint(String order, String lan, String lon, boolean markerExist, String title, String comment, String checkPointNum, boolean photoExist){
         this.order = order;
         this.lan = lan;
         this.lon = lon;
@@ -22,6 +23,7 @@ public class GpsPoint implements Serializable {
         this.title = title;
         this.comment = comment;
         this.checkPointNum = checkPointNum;
+        this.photoExist = photoExist;
     }
 
     public String getOrder() {
@@ -50,5 +52,9 @@ public class GpsPoint implements Serializable {
 
     public String getCheckPointNum() {
         return checkPointNum;
+    }
+
+    public boolean isPhotoExist() {
+        return photoExist;
     }
 }
