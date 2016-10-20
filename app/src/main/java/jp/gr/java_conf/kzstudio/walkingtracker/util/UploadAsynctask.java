@@ -43,7 +43,7 @@ public class UploadAsyncTask extends AsyncTaskLoader<String> {
     public String loadInBackground() {
         try {
             // パラメータ作成 Activityを継承していないとPriferenceから読み込めないので引数でもらう
-            String url = "";
+            String url = "http://www.project-one.sakura.ne.jp/e-net_api/TanboCameraServer.php";
             HttpClient httpClient = new DefaultHttpClient();
 
             HttpPost httpPost = new HttpPost(url);
@@ -52,18 +52,20 @@ public class UploadAsyncTask extends AsyncTaskLoader<String> {
 
             //PictureUtil pictureUtil = new PictureUtil();//PhotoUploadActivityで作ったbitmapを取得する
             //PictureUtil.outputToFile(PictureUtil.bmPhoto,"photo",outputDir);
-            PictureUtil.outputToFile(PictureUtil.bmPhotoReal,"photoReal",outputDir);
+            PictureUtil.outputToFile(PictureUtil.bmPhotoReal,fileName,outputDir);
             MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-            File file = new File(outputDir + "/photoReal.jpeg");
+            File file = new File(outputDir + "/"+fileName+".jpeg");
 
             //画像を添付
             multipartEntity.addPart("photo", new FileBody(file));
             //文字を添付
-            multipartEntity.addPart("filename", new StringBody(fileName));//文字列送りたい時に使う
+            //multipartEntity.addPart("filename", new StringBody(fileName));//文字列送りたい時に使う
 
             httpPost.setEntity(multipartEntity);
 
             ReceiveStr = httpClient.execute(httpPost, responseHandler);
+
+            file.delete();
         } catch (ClientProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {

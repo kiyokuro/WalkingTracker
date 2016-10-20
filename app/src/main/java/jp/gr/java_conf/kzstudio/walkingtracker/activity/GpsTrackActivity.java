@@ -340,7 +340,8 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         .show();*/
 
                 Intent intent = new Intent(this, MakeCheckpointActivity.class);
-                intent.putExtra("latlng",String.valueOf(mLat+mLon));
+                String str = String.valueOf(mLat+mLon).replaceAll(".","_");
+                intent.putExtra("latlng",str);
                 startActivityForResult(intent, 1);
 
                 isMarkerExist = true;
@@ -413,7 +414,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         for(int i = 0; i< mCheckPointPosition.size(); i++){
             stringData += mCheckPointPosition.get(i).getOrder()+"@"+ mCheckPointPosition.get(i).getLan()+"@"+ mCheckPointPosition.get(i).getLon()+"@"+
                     String.valueOf(mCheckPointPosition.get(i).isMarkerExist())+"@"+ mCheckPointPosition.get(i).getTitle()+"@"+
-                    mCheckPointPosition.get(i).getComment() + "@" + mCheckPointPosition.get(i).getCheckPointNum()+",";
+                    mCheckPointPosition.get(i).getComment() + "@" + mCheckPointPosition.get(i).getCheckPointNum()+"@"+mCheckPointPosition.get(i).isPhotoExist()+",";
         }
         return stringData;
     }

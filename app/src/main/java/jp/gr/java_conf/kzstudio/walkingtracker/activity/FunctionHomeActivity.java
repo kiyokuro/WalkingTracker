@@ -73,6 +73,22 @@ public class FunctionHomeActivity extends AppCompatActivity {
         }
         showRecordList();*/
         //-------------------------------------------------------------------------------------------------
+
+        findViewById(R.id.camera).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                aaaaa();
+            }
+        });
+    }
+    private void aaaaa(){
+        String str = "35.681382139.766084";
+        str = str.replaceAll(".","_");
+        Log.v("aaaaa","aaa "+str);
+        Intent intent = new Intent(this, MakeCheckpointActivity.class);
+        intent.putExtra("latlng",String.valueOf("str"));
+        startActivity(intent);
+
     }
 
     private void getWalkRecordList(){

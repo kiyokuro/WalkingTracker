@@ -1,18 +1,22 @@
 package jp.gr.java_conf.kzstudio.walkingtracker.activity;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -25,19 +29,15 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.SupportMapFragment;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.Calendar;
-import java.util.TimeZone;
 
 import jp.gr.java_conf.kzstudio.walkingtracker.R;
 import jp.gr.java_conf.kzstudio.walkingtracker.fragment.ProgressDialogFragment;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.GpsPoint;
 import jp.gr.java_conf.kzstudio.walkingtracker.util.ItemDialogUtility;
 import jp.gr.java_conf.kzstudio.walkingtracker.util.PictureUtil;
 import jp.gr.java_conf.kzstudio.walkingtracker.util.UploadAsyncTask;
@@ -55,6 +55,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     };
     static final int REQUEST_CODE_CAMERA = 1; /* カメラを判定するコード */
     static final int REQUEST_CODE_GALLERY = 2; /* ギャラリーを判定するコード */
+    private final int _REQUEST_PERMISSION_CAMERA = 0x01;
 
     private ImageView imageView;
     private Button button1;
@@ -71,7 +72,6 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     private String selectedDate;
 
     private String[] postMessege = new String[3];
-    private File outputDir;
     private boolean isTakePhoto = false;
     int loatation = 0;
 
@@ -83,8 +83,9 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         setTitle("チェックポイント作成");
 
         imageView = (ImageView)findViewById(R.id.image);
-        button1 = (Button)findViewById(R.id.button1);
-        button1.setOnClickListener(this);
+        imageView.setOnClickListener(this);
+        //button1 = (Button)findViewById(R.id.button1);
+        //button1.setOnClickListener(this);
         left_turn = (Button)findViewById(R.id.left_turn);
         left_turn.setOnClickListener(this);
         left_turn.setVisibility(View.INVISIBLE);
@@ -98,13 +99,53 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         upload.setOnClickListener(this);
         frameLayout = (FrameLayout) findViewById(R.id.frame);
 
-        outputDir = getDir("eNet", Context.MODE_PRIVATE);
-
         Intent intent = getIntent();
         postMessege[0] = intent.getStringExtra("latlng");
 
-
+        if (Build.VERSION.SDK_INT >= 23) {
+            checkPermission();
+        }
     }
+
+    /**
+     * 位置情報の権限が許可されているか確認する。許可されてなければ許可を求める。
+     */
+    @TargetApi(Build.VERSION_CODES.M)
+    private void checkPermission() {
+        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.CAMERA)) {
+                ActivityCompat.requestPermissions(MakeCheckpointActivity.this,
+                        new String[]{Manifest.permission.CAMERA}, _REQUEST_PERMISSION_CAMERA);
+
+            } else {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.CAMERA,}, _REQUEST_PERMISSION_CAMERA);
+            }
+        }
+    }
+
+    /**
+     * checkPermissionで権限を求めた結果を受け取る。
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == _REQUEST_PERMISSION_CAMERA) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            } else {
+                Toast toast = Toast.makeText(this, "カメラは利用できません", Toast.LENGTH_SHORT);
+                toast.show();
+                finish();
+            }
+        }
+    }
+
+
     @Override
     public void onStart(){
         super.onStart();
@@ -131,7 +172,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     @Override
     public void onClick(View v){
         switch (v.getId()){
-            case R.id.button1:
+            case R.id.image:
                 ItemDialogUtility.show(this, this, "写真を選択", items);
                 break;
             case R.id.upload:
@@ -179,7 +220,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     protected void wakeupCamera(){
         File out = new File(Environment.getExternalStorageDirectory()+"/tmpPhoto.jpg");
         Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(out));
+        //i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(out));
         startActivityForResult(i, REQUEST_CODE_CAMERA);
     }
 
@@ -206,8 +247,9 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
                         //FileInputStream fileInputStream = new FileInputStream(new File(Environment.getExternalStorageDirectory()+"/tmpPhoto.jpg"));
                         BitmapFactory.Options imageOptions = new BitmapFactory.Options();
                         imageOptions.inPreferredConfig = Bitmap.Config.ARGB_4444;
-                        bm = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() + "/tmpPhoto.jpg", imageOptions);
-                        //bm = (Bitmap) data.getExtras().get("data");
+                        //bm = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() + "/tmpPhoto.jpg", imageOptions);
+                        bm = (Bitmap) data.getExtras().get("data");
+                        Log.v("aaaaaaaa","aaaaaaaa");
                     }catch (Exception e){
                         e.printStackTrace();
                     }

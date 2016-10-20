@@ -212,8 +212,10 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                             String[] pointData = datas[i].split("@",-1);
                             //記録されている位置情報のうち、チェックポイントに登録されているものだけ取得したリストを作成
                             if(pointData[3].equals("true")){
-                                if(pointData[7].equals("true")){
-                                    mCheckPointPosition.add(new GpsPoint(pointData[0],pointData[1],pointData[2],true,pointData[4],pointData[5],pointData[6],true));
+                                if(pointData.length > 7 && pointData[7]!=null){
+                                    if(pointData[7].equals("true")) {
+                                        mCheckPointPosition.add(new GpsPoint(pointData[0], pointData[1], pointData[2], true, pointData[4], pointData[5], pointData[6], true));
+                                    }
                                 }else {
                                     mCheckPointPosition.add(new GpsPoint(pointData[0], pointData[1], pointData[2], true, pointData[4], pointData[5], pointData[6], false));
                                 }
@@ -402,7 +404,8 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
         lan.setText("緯度："+item.getLan());
         lon.setText("軽度：" + item.getLon());
         if(item.isPhotoExist()){
-            String url = "/aaaaaaaaaaaaa/"+item.getLan()+item.getLon();//写真のURLは座標にしてある
+            String str = item.getLan()+item.getLon().replaceAll(".","_");
+            String url = "/http://www.project-one.sakura.ne.jp/e-net_api/photo/"+str;//写真のURLは座標にしてある
             image.setImageUrl(url, new ImageLoader(queue, new ImageLoader.ImageCache() {
                 @Override
                 public Bitmap getBitmap(String url) {
