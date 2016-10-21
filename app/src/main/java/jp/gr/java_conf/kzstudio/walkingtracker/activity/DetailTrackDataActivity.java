@@ -404,7 +404,7 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
         lan.setText("緯度："+item.getLan());
         lon.setText("軽度：" + item.getLon());
         if(item.isPhotoExist()){
-            String str = item.getLan()+item.getLon().replaceAll(".","_");
+            String str = item.getLan()+item.getLon().replace(".","_");
             String url = "/http://www.project-one.sakura.ne.jp/e-net_api/photo/"+str;//写真のURLは座標にしてある
             image.setImageUrl(url, new ImageLoader(queue, new ImageLoader.ImageCache() {
                 @Override

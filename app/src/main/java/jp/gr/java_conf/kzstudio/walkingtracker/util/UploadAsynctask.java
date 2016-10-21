@@ -1,6 +1,7 @@
 package jp.gr.java_conf.kzstudio.walkingtracker.util;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v4.content.AsyncTaskLoader;
 
 import org.apache.http.client.ClientProtocolException;
@@ -30,13 +31,13 @@ public class UploadAsyncTask extends AsyncTaskLoader<String> {
     private File outputDir;
     String[] param;
     ProgressDialogFragment dialog;
-    private String fileName;
+    private Uri imageUri;
 
-    public UploadAsyncTask(Context context, ProgressDialogFragment dialog, File outputDir, String fileName) {
+    public UploadAsyncTask(Context context, ProgressDialogFragment dialog, File outputDir, Uri imageUri) {
         super(context);
         this.dialog = dialog;
         this.outputDir = outputDir;
-        this.fileName = fileName;
+        this.imageUri = imageUri;
     }
 
     @Override
@@ -50,11 +51,10 @@ public class UploadAsyncTask extends AsyncTaskLoader<String> {
             httpPost.setHeader("ENCTYPE","multipart/form-data");
             ResponseHandler<String> responseHandler = new BasicResponseHandler();
 
-            //PictureUtil pictureUtil = new PictureUtil();//PhotoUploadActivityで作ったbitmapを取得する
-            //PictureUtil.outputToFile(PictureUtil.bmPhoto,"photo",outputDir);
-            PictureUtil.outputToFile(PictureUtil.bmPhotoReal,fileName,outputDir);
+            //PictureUtil.outputToFile(PictureUtil.bmPhotoReal,fileName,outputDir);
             MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-            File file = new File(outputDir + "/"+fileName+".jpeg");
+            //File file = new File(outputDir + "/"+fileName+".jpeg");
+            File file = new File(imageUri.getPath());
 
             //画像を添付
             multipartEntity.addPart("photo", new FileBody(file));

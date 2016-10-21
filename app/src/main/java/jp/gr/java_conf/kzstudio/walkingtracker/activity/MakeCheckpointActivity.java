@@ -3,6 +3,7 @@ package jp.gr.java_conf.kzstudio.walkingtracker.activity;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,6 +36,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 
 import java.io.File;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import jp.gr.java_conf.kzstudio.walkingtracker.R;
 import jp.gr.java_conf.kzstudio.walkingtracker.fragment.ProgressDialogFragment;
@@ -58,7 +61,6 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     private final int _REQUEST_PERMISSION_CAMERA = 0x01;
 
     private ImageView imageView;
-    private Button button1;
     private Button left_turn;
     private Button right_turn;
     private TextView text;
@@ -66,14 +68,12 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     private Button upload;
     private FrameLayout frameLayout;
 
-    private Uri bitmapUri;
-    private Bitmap bm;
-    private Bitmap bm2;
-    private String selectedDate;
+    private Uri mImageUri;
 
     private String[] postMessege = new String[3];
     private boolean isTakePhoto = false;
-    int loatation = 0;
+    private String title;
+    private long currentTime;
 
 
     @Override
@@ -84,8 +84,6 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
 
         imageView = (ImageView)findViewById(R.id.image);
         imageView.setOnClickListener(this);
-        //button1 = (Button)findViewById(R.id.button1);
-        //button1.setOnClickListener(this);
         left_turn = (Button)findViewById(R.id.left_turn);
         left_turn.setOnClickListener(this);
         left_turn.setVisibility(View.INVISIBLE);
@@ -100,7 +98,8 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         frameLayout = (FrameLayout) findViewById(R.id.frame);
 
         Intent intent = getIntent();
-        postMessege[0] = intent.getStringExtra("latlng");
+        title = intent.getStringExtra("title");
+        currentTime = intent.getLongExtra("cuttentTime",0);
 
         if (Build.VERSION.SDK_INT >= 23) {
             checkPermission();
@@ -162,9 +161,6 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
             case 0:
                 wakeupCamera(); // カメラ起動
                 break;
-            case 1:
-                wakeupGallery(); // ギャラリー起動
-                break;
             default:
                 break;
         }
@@ -173,168 +169,111 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     public void onClick(View v){
         switch (v.getId()){
             case R.id.image:
-                ItemDialogUtility.show(this, this, "写真を選択", items);
+                wakeupCamera();
                 break;
             case R.id.upload:
-                upload.setEnabled(false);
-                if(isTakePhoto) {
-                    Matrix matrixl1 = new Matrix();
-                    matrixl1.postRotate((float) loatation % 360);
-                    PictureUtil.bmPhotoReal = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrixl1, false);
-                    PictureUtil.bmPhoto = bm2;
+                if(commentText.getText().toString().equals("")){
+                    new AlertDialog.Builder(MakeCheckpointActivity.this)
+                            .setIcon(android.R.drawable.ic_dialog_info)
+                            .setTitle("コメントを記入してください")
+                            .setCancelable(false)
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
 
-                    //非同期処理の実行
-                    Bundle args = new Bundle();
-                    args.putStringArray("postMassege", postMessege);
-                    getSupportLoaderManager().initLoader(0, args, this);//onCreateLoderを実行する
+                                }
+                            })
+                            .show();
                 }else {
-                    closeActivity();
+                    upload.setEnabled(false);
+                    if (isTakePhoto) {
+                        //非同期処理の実行
+                        Bundle args = new Bundle();
+                        args.putStringArray("postMassege", postMessege);
+                        getSupportLoaderManager().initLoader(0, args, this);//onCreateLoderを実行する
+                    } else {
+                        closeActivity();
+                    }
                 }
-                break;
-            case R.id.left_turn:
-                if(bm2 == null){
-                    break;
-                }
-                Matrix matrixl = new Matrix();
-                matrixl.postRotate(-90.0f);
-                loatation -= 90;
-                //Bitmap回転させる
-                Bitmap fixedBm2L = Bitmap.createBitmap(bm2, 0, 0, bm2.getWidth(), bm2.getHeight(), matrixl, false);
-                bm2 = fixedBm2L;
-                imageView.setImageBitmap(fixedBm2L);
-                break;
-            case R.id.right_turn:
-                if(bm2 == null){
-                    break;
-                }
-                Matrix matrixr = new Matrix();
-                matrixr.postRotate(90.0f);
-                loatation += 90;
-                //Bitmap回転させる
-                bm2 = Bitmap.createBitmap(bm2, 0, 0, bm2.getWidth(), bm2.getHeight(), matrixr, false);
-                imageView.setImageBitmap(bm2);
                 break;
         }
     }
 
     protected void wakeupCamera(){
-        File out = new File(Environment.getExternalStorageDirectory()+"/tmpPhoto.jpg");
-        Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        //i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(out));
-        startActivityForResult(i, REQUEST_CODE_CAMERA);
-    }
-
-    protected void wakeupGallery(){
-        Intent i = new Intent();
-        i.setType("image/*"); // 画像のみが表示されるようにフィルターをかける
-        i.setAction(Intent.ACTION_GET_CONTENT); // 出0他を取得するアプリをすべて開く
-        startActivityForResult(i, REQUEST_CODE_GALLERY);
+        mImageUri = getPhotoUri(title, currentTime);
+        Intent intent = new Intent();
+        intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
+        startActivityForResult(intent, REQUEST_CODE_CAMERA);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         if (resultCode == RESULT_OK){
-            if (bm != null)
-                bm.recycle(); // 直前のBitmapが読み込まれていたら開放する
-
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 4; // 元の1/4サイズでbitmap取得
-            options.inDither = false;
 
             switch(requestCode){
                 case 1: // カメラの場合
                     try {
-                        //FileInputStream fileInputStream = new FileInputStream(new File(Environment.getExternalStorageDirectory()+"/tmpPhoto.jpg"));
-                        BitmapFactory.Options imageOptions = new BitmapFactory.Options();
-                        imageOptions.inPreferredConfig = Bitmap.Config.ARGB_4444;
-                        //bm = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() + "/tmpPhoto.jpg", imageOptions);
-                        bm = (Bitmap) data.getExtras().get("data");
-                        Log.v("aaaaaaaa","aaaaaaaa");
+                        imageView.setImageURI(mImageUri);
                     }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                    // 撮影した画像をギャラリーのインデックスに追加されるようにスキャンする。
-                    // これをやらないと、アプリ起動中に撮った写真が反映されない
-                    /*String[] paths = {bitmapUri.getPath()};
-                    String[] mimeTypes = {"image/*"};
-                    MediaScannerConnection.scanFile(getApplicationContext(), paths, mimeTypes, new MediaScannerConnection.OnScanCompletedListener(){
-                        @Override
-                        public void onScanCompleted(String path, Uri uri){
-                        }
-                    });
-                    */
-                    break;
-                case 2: // ギャラリーの場合
-                    try{
-                        //ContentResolver cr = getContentResolver();
-                        //String[] columns = { MediaStore.Images.Media.DATA };
-                        //Cursor c = cr.query(data.getData(), columns, null, null, null);
-                        //c.moveToFirst();
-                        //bitmapUri = Uri.fromFile(new File(c.getString(0)));
-                        InputStream is = getContentResolver().openInputStream(data.getData());
-                        bm = BitmapFactory.decodeStream(is, null, options);
-                        is.close();
-
-                        //InputStream in = getContentResolver().openInputStream(data.getData());
-                        //bm = BitmapFactory.decodeStream(in);
-                        //in.close();
-                    }catch(Exception e){
                         e.printStackTrace();
                     }
                     break;
             }
-            bm2 = trimPhoto(bm);
-            imageView.setImageBitmap(bm2); // imgView（イメージビュー）を準備しておく
             text.setText("");
-            left_turn.setVisibility(View.VISIBLE);
-            right_turn.setVisibility(View.VISIBLE);
+            imageView.setEnabled(false);
             isTakePhoto = true;
         }
     }
 
     /**
-     * ビットマップの画像を中央で正方形にトリミングする
-     * @return トリミングされた画像
+     * 画像のディレクトリパスを取得する
+     * @return
      */
-    public Bitmap trimPhoto(Bitmap bm){
-        int w = bm.getWidth();
-        int h = bm.getHeight();
-        float scale = Math.max((float) 500 / w, (float) 500 / h);
-        int size = Math.min(w, h);
-        Matrix matrix = new Matrix();
-        matrix.postScale(scale, scale);
-        return Bitmap.createBitmap(bm, (w - size) / 2, (h - size) / 2, size, size, matrix, true);
+    private String getDirPath() {
+        String dirPath = "";
+        File photoDir = null;
+        File extStorageDir = Environment.getExternalStorageDirectory();
+        if (extStorageDir.canWrite()) {
+            photoDir = new File(extStorageDir.getPath() + "/" + getPackageName());
+        }
+        if (photoDir != null) {
+            if (!photoDir.exists()) {
+                photoDir.mkdirs();
+            }
+            if (photoDir.canWrite()) {
+                dirPath = photoDir.getPath();
+            }
+        }
+        return dirPath;
     }
 
     /**
-     * サムネイル用に小さい画像にトリミングする
-     * @return トリミングされた画像
+     * 画像のUriを取得する
+     * @return
      */
-    public Bitmap trimPhotoSmoll(Bitmap bm){
-        int w = bm.getWidth();
-        int h = bm.getHeight();
-        float scale = Math.max((float)50/w, (float) 50/h);
-        int size = Math.min(w, h);
-        Matrix matrix = new Matrix();
-        matrix.postScale(scale, scale);
-        return Bitmap.createBitmap(bm, (w - size) / 2, (h - size) / 2, size, size, matrix, true);
+    private Uri getPhotoUri(String title, long currentTimeMillis) {
+
+
+        String dirPath = getDirPath();
+        String fileName = title+ ".jpg";
+        String path = dirPath + "/" + fileName;
+        File file = new File(path);
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, title);
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.Images.Media.DATA, path);
+        values.put(MediaStore.Images.Media.DATE_TAKEN, currentTimeMillis);
+        if (file.exists()) {
+            values.put(MediaStore.Images.Media.SIZE, file.length());
+        }
+        Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        return uri;
     }
 
     @Override
     public Loader<String> onCreateLoader(int id, Bundle args) {
-        if(commentText.getText().toString().equals("")){
-            new AlertDialog.Builder(MakeCheckpointActivity.this)
-                    .setIcon(android.R.drawable.ic_dialog_info)
-                    .setTitle("コメントを記入してください")
-                    .setCancelable(false)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-
-                        }
-                    })
-                    .show();
-        }
-
         final File outputDir = getDir("eNet",Context.MODE_PRIVATE);
         //プログレスダイアログの設定
         ProgressDialogFragment dialog = new ProgressDialogFragment();
@@ -345,7 +284,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         dialog.show(getSupportFragmentManager(),"PROGRESS");
 
         // サーバにアップロード
-        UploadAsyncTask uploadAsyncTask = new UploadAsyncTask(this, dialog, outputDir, postMessege[0]);
+        UploadAsyncTask uploadAsyncTask = new UploadAsyncTask(this, dialog, outputDir, mImageUri);
         uploadAsyncTask.forceLoad();
         return uploadAsyncTask;
     }

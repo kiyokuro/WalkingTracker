@@ -29,7 +29,9 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,10 +85,15 @@ public class FunctionHomeActivity extends AppCompatActivity {
     }
     private void aaaaa(){
         String str = "35.681382139.766084";
-        str = str.replaceAll(".","_");
+        str = str.replace(".","d");
         Log.v("aaaaa","aaa "+str);
         Intent intent = new Intent(this, MakeCheckpointActivity.class);
-        intent.putExtra("latlng",String.valueOf("str"));
+        long currentTimeMillis = System.currentTimeMillis();
+        Date today = new Date(currentTimeMillis);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String title = dateFormat.format(today);
+        intent.putExtra("title",title);
+        intent.putExtra("cuttentTime", currentTimeMillis);
         startActivity(intent);
 
     }

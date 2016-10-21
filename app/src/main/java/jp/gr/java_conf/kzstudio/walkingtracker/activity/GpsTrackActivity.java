@@ -340,7 +340,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         .show();*/
 
                 Intent intent = new Intent(this, MakeCheckpointActivity.class);
-                String str = String.valueOf(mLat+mLon).replaceAll(".","_");
+                String str = String.valueOf(mLat+mLon).replace(".","_");
                 intent.putExtra("latlng",str);
                 startActivityForResult(intent, 1);
 

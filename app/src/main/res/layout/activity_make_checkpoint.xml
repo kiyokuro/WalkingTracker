@@ -25,12 +25,18 @@
             android:background="@drawable/frame_boder1"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="写真"
+            android:textSize="18dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"/>
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/frame"
-            android:layout_gravity="center"
-            android:layout_marginTop="80dp">
+            android:layout_gravity="center">
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
