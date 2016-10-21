@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.activity;
+package jp.gr.java_conf.kzstudio.enet.activity;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -9,9 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,7 +19,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,18 +28,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.SupportMapFragment;
-
 import java.io.File;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-import jp.gr.java_conf.kzstudio.walkingtracker.R;
-import jp.gr.java_conf.kzstudio.walkingtracker.fragment.ProgressDialogFragment;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.ItemDialogUtility;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.PictureUtil;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.UploadAsyncTask;
+import jp.gr.java_conf.kzstudio.enet.R;
+import jp.gr.java_conf.kzstudio.enet.fragment.ProgressDialogFragment;
+import jp.gr.java_conf.kzstudio.enet.util.ItemDialogUtility;
+import jp.gr.java_conf.kzstudio.enet.util.UploadAsyncTask;
 
 /**
  * Created by kiyokazu on 2016/10/19.
@@ -302,7 +292,8 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     private void closeActivity(){
         Intent intent = new Intent();
         Bundle bundle = new Bundle();
-        bundle.putString("title", commentText.getText().toString());
+        bundle.putString("comment", commentText.getText().toString());
+        bundle.putString("time", String.valueOf(currentTime));
         intent.putExtras(bundle);
         setResult(RESULT_OK, intent);
         finish();

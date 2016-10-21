@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.activity;
+package jp.gr.java_conf.kzstudio.enet.activity;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -41,16 +41,18 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import jp.gr.java_conf.kzstudio.walkingtracker.R;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.GpsPoint;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.UserPreference;
+import jp.gr.java_conf.kzstudio.enet.R;
+import jp.gr.java_conf.kzstudio.enet.util.GpsPoint;
+import jp.gr.java_conf.kzstudio.enet.util.UserPreference;
 
 public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, View.OnClickListener {
 
@@ -340,8 +342,12 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         .show();*/
 
                 Intent intent = new Intent(this, MakeCheckpointActivity.class);
-                String str = String.valueOf(mLat+mLon).replace(".","_");
-                intent.putExtra("latlng",str);
+                long currentTimeMillis = System.currentTimeMillis();
+                Date today = new Date(currentTimeMillis);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+                String title = dateFormat.format(today);
+                intent.putExtra("title",title);
+                intent.putExtra("cuttentTime", currentTimeMillis);
                 startActivityForResult(intent, 1);
 
                 isMarkerExist = true;
@@ -394,8 +400,8 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         Bundle bundle = data.getExtras();
 
         if (resultCode == RESULT_OK){
-            createMarker(bundle.getString("title"), bundle.getString("comment"));
-            mCheckPointPosition.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", bundle.getString("title"), String.valueOf(mCheckPointNum), true));
+            createMarker("", bundle.getString("comment"));
+            mCheckPointPosition.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, bundle.getString("time"), bundle.getString("title"), String.valueOf(mCheckPointNum), true));
             mCheckPointNum++;
         }
     }
@@ -403,7 +409,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
     private void createMarker(String title, String comment){
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(mLat, mLon))
-                .title(title)
+                .title(comment)
                         //.snippet(comment)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
     }
@@ -413,7 +419,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         String stringData = "";
         for(int i = 0; i< mCheckPointPosition.size(); i++){
             stringData += mCheckPointPosition.get(i).getOrder()+"@"+ mCheckPointPosition.get(i).getLan()+"@"+ mCheckPointPosition.get(i).getLon()+"@"+
-                    String.valueOf(mCheckPointPosition.get(i).isMarkerExist())+"@"+ mCheckPointPosition.get(i).getTitle()+"@"+
+                    String.valueOf(mCheckPointPosition.get(i).isMarkerExist())+"@"+ mCheckPointPosition.get(i).getTime()+"@"+
                     mCheckPointPosition.get(i).getComment() + "@" + mCheckPointPosition.get(i).getCheckPointNum()+"@"+mCheckPointPosition.get(i).isPhotoExist()+",";
         }
         return stringData;

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.util;
+package jp.gr.java_conf.kzstudio.enet.util;
 
 import android.graphics.Bitmap;
 

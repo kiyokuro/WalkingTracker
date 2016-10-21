@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.util;
+package jp.gr.java_conf.kzstudio.enet.util;
 
 import java.io.Serializable;
 
@@ -10,17 +10,17 @@ public class GpsPoint implements Serializable {
     String lan;
     String lon;
     boolean markerExist;
-    String title = "";
+    String time = "";
     String comment = "";
     String checkPointNum;
     boolean photoExist;
 
-    public GpsPoint(String order, String lan, String lon, boolean markerExist, String title, String comment, String checkPointNum, boolean photoExist){
+    public GpsPoint(String order, String lan, String lon, boolean markerExist, String time, String comment, String checkPointNum, boolean photoExist){
         this.order = order;
         this.lan = lan;
         this.lon = lon;
         this.markerExist = markerExist;
-        this.title = title;
+        this.time = time;
         this.comment = comment;
         this.checkPointNum = checkPointNum;
         this.photoExist = photoExist;
@@ -42,8 +42,8 @@ public class GpsPoint implements Serializable {
         return markerExist;
     }
 
-    public String getTitle() {
-        return title;
+    public String getTime() {
+        return time;
     }
 
     public String getComment() {

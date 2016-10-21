@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.activity;
+package jp.gr.java_conf.kzstudio.enet.activity;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -22,9 +22,9 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import jp.gr.java_conf.kzstudio.walkingtracker.R;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.LodingIndicator;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.UserPreference;
+import jp.gr.java_conf.kzstudio.enet.R;
+import jp.gr.java_conf.kzstudio.enet.util.LodingIndicator;
+import jp.gr.java_conf.kzstudio.enet.util.UserPreference;
 
 public class SplashActivity extends Activity {
 

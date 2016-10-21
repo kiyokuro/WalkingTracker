@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.fragment;
+package jp.gr.java_conf.kzstudio.enet.fragment;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;

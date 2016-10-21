@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.activity;
+package jp.gr.java_conf.kzstudio.enet.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -13,8 +13,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
-import jp.gr.java_conf.kzstudio.walkingtracker.R;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.UserPreference;
+import jp.gr.java_conf.kzstudio.enet.R;
+import jp.gr.java_conf.kzstudio.enet.util.UserPreference;
 
 /**
  * Created by kiyokazu on 16/08/04.

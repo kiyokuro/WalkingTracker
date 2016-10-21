@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.util;
+package jp.gr.java_conf.kzstudio.enet.util;
 
 import android.content.Context;
 import android.net.Uri;
@@ -11,14 +11,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.File;
 import java.io.IOException;
 
-import jp.gr.java_conf.kzstudio.walkingtracker.fragment.ProgressDialogFragment;
+import jp.gr.java_conf.kzstudio.enet.fragment.ProgressDialogFragment;
 
 /**
  * Created by kiyokazu on 2016/10/19.

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker;
+package jp.gr.java_conf.kzstudio.enet;
 
 import org.junit.Test;
 

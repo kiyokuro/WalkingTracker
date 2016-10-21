@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.activity;
+package jp.gr.java_conf.kzstudio.enet.activity;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -50,9 +50,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jp.gr.java_conf.kzstudio.walkingtracker.R;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.GpsPoint;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.JsonParser;
+import jp.gr.java_conf.kzstudio.enet.R;
+import jp.gr.java_conf.kzstudio.enet.util.GpsPoint;
+import jp.gr.java_conf.kzstudio.enet.util.JsonParser;
 
 /**
  * Created by kiyokazu on 16/04/11.
@@ -404,7 +404,7 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
         lan.setText("緯度："+item.getLan());
         lon.setText("軽度：" + item.getLon());
         if(item.isPhotoExist()){
-            String str = item.getLan()+item.getLon().replace(".","_");
+            String str = item.getTime();
             String url = "/http://www.project-one.sakura.ne.jp/e-net_api/photo/"+str;//写真のURLは座標にしてある
             image.setImageUrl(url, new ImageLoader(queue, new ImageLoader.ImageCache() {
                 @Override

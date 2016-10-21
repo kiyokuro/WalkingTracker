@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.activity;
+package jp.gr.java_conf.kzstudio.enet.activity;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,13 +31,11 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import jp.gr.java_conf.kzstudio.walkingtracker.R;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.JsonParser;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.UserPreference;
+import jp.gr.java_conf.kzstudio.enet.R;
+import jp.gr.java_conf.kzstudio.enet.util.JsonParser;
+import jp.gr.java_conf.kzstudio.enet.util.UserPreference;
 
 /**
  * GPSTrackの新規登録と既存のもを閲覧を選択するホーム画面
@@ -84,9 +81,6 @@ public class FunctionHomeActivity extends AppCompatActivity {
         });
     }
     private void aaaaa(){
-        String str = "35.681382139.766084";
-        str = str.replace(".","d");
-        Log.v("aaaaa","aaa "+str);
         Intent intent = new Intent(this, MakeCheckpointActivity.class);
         long currentTimeMillis = System.currentTimeMillis();
         Date today = new Date(currentTimeMillis);

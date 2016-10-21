@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker;
+package jp.gr.java_conf.kzstudio.enet;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
