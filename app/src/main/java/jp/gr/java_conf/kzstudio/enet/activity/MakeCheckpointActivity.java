@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -191,6 +193,10 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
                     }
                 }
                 break;
+            case R.id.right_turn:
+                break;
+            case R.id.left_turn:
+                break;
         }
     }
 
@@ -214,12 +220,16 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
             switch(requestCode){
                 case 1: // カメラの場合
                     try {
-                        imageView.setImageURI(mImageUri);
+                        Bitmap bm = BitmapFactory.decodeFile(getPath(this,mImageUri));
+                        imageView.setImageBitmap(bm);
+                        //imageView.setImageURI(mImageUri);
                     }catch (Exception e){
                         e.printStackTrace();
                     }
                     break;
             }
+            //right_turn.setVisibility(View.VISIBLE);
+            //left_turn.setVisibility(View.VISIBLE);
             text.setText("");
             imageView.setEnabled(false);
             isTakePhoto = true;
