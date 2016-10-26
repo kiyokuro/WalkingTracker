@@ -282,11 +282,9 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
 
         Map<String, String> binaryParams = new HashMap<>();
         Map<String,String> strMap = new HashMap<String, String>();
-        Map<String, File> fileMap = new HashMap<String, File>();
         Log.i("aaaa",getPath(this, mImageUri));
         strMap.put("name",String.valueOf(currentTime));
         binaryParams.put("uploadFiles", getPath(this, mImageUri));
-        fileMap.put("uploadFiles", new File(getPath(this, mImageUri)));
 
         MultipartRequest multipartRequest = new MultipartRequest(
                 "http://www.project-one.sakura.ne.jp/e-net_api/TanboCameraServer.php",//insertPhoto.php",
@@ -313,9 +311,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
                         }
                         isTakePhoto = false;
                     }
-                }/*,
-                strMap,
-                fileMap*/);
+                });
         multipartRequest.setBinaryParams(binaryParams);
         multipartRequest.setTextParams(strMap);
         mQueue.add(multipartRequest);

@@ -10,14 +10,8 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 
-import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -45,47 +39,15 @@ public class MultipartRequest extends StringRequest {
 
     private MultipartEntityBuilder mBuilder = MultipartEntityBuilder.create();
 
-    public MultipartRequest(String url, Response.Listener<String> listener, Response.ErrorListener errorListener/*,
-                            Map<String, String> textParams, Map<String, File> fileParams*/) {
+    public MultipartRequest(String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
         super(Method.POST, url, listener, errorListener);
 
-        //テスト用----------------------------
-        /*mBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-        mBuilder.setBoundary("___________________" + Long.toString(System.currentTimeMillis()));
-        mBuilder.setCharset(Consts.UTF_8);
 
-        for (Map.Entry<String, String> entry : textParams.entrySet()) {
-            mBuilder.addTextBody(entry.getKey(), entry.getValue());
-        }
-
-        for (Map.Entry<String, ?> entry : fileParams.entrySet()) {
-            ContentType imageContentType = ContentType.create("image/jpeg");
-
-            if (entry.getValue() instanceof byte[]) {
-                Log.i("aaaa","1");
-                //Log.d(TAG, "entry.getValue() => byte[]");
-                mBuilder.addBinaryBody("uploadFiles", (byte[]) entry.getValue(), imageContentType, entry.getKey());
-            } else if (entry.getValue() instanceof File) {
-                Log.i("aaaa","2");
-                //Log.d(TAG, "entry.getValue() => File");
-                mBuilder.addBinaryBody("uploadFiles", (File) entry.getValue(), imageContentType, entry.getKey());
-            } else if (entry.getValue() instanceof InputStream) {
-                Log.i("aaaa", "3");
-                //Log.d(TAG, "entry.getValue() => InputStream");
-                //Log.d(TAG, "key: " + entry.getKey());
-                mBuilder.addBinaryBody("uploadFiles[]", (InputStream) entry.getValue(), imageContentType, entry.getKey());
-            }else {
-                Log.i("aaaa","4");
-            }
-        }
-*/
-        //テスト用----------------------------
     }
 
     @Override
     public String getBodyContentType() {
         return "multipart/form-data;boundary=" + boundary;
-        //return mBuilder.build().getContentType().getValue();
     }
 
     public HttpEntity getEntity() {
@@ -104,7 +66,6 @@ public class MultipartRequest extends StringRequest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.i("aaaa",bos.toString());
         return bos.toByteArray();
     }
 
@@ -163,7 +124,6 @@ class UploadFile {
     }
 
     String getName() {
-        Log.i("aaaa",PathUtil.getFileName(filePath));
         return PathUtil.getFileName(filePath);
     }
 
@@ -174,7 +134,6 @@ class UploadFile {
     }
 
     byte[] getByteArray() throws IOException {
-        Log.i("aaaa",FileUtil.readAsByteArray(new File(filePath)).toString());
         return FileUtil.readAsByteArray(new File(filePath));
     }
 }
