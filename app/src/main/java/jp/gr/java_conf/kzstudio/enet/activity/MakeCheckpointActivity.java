@@ -74,6 +74,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     private String[] postMessege = new String[3];
     private boolean isTakePhoto = false;
     private String title;
+    private String mFileName;
     private long currentTime;
     private RequestQueue mQueue;
 
@@ -101,7 +102,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
 
         Intent intent = getIntent();
         title = intent.getStringExtra("title");
-        currentTime = intent.getLongExtra("cuttentTime",0);
+        currentTime = intent.getLongExtra("currentTime",0);
         mQueue = Volley.newRequestQueue(this);
 
         if (Build.VERSION.SDK_INT >= 23) {
@@ -268,6 +269,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         String dirPath = getDirPath();
         String fileName = title+ ".jpg";
         String path = dirPath + "/" + fileName;
+        mFileName = fileName;
         File file = new File(path);
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.TITLE, title);
@@ -320,6 +322,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
                             dialog.onDismiss(dialog.getDialog());
                         }
                         isTakePhoto = false;
+                        upload.setEnabled(true);
                     }
                 });
         multipartRequest.setBinaryParams(binaryParams);
@@ -331,7 +334,9 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         Intent intent = new Intent();
         Bundle bundle = new Bundle();
         bundle.putString("comment", commentText.getText().toString());
-        bundle.putString("time", String.valueOf(currentTime));
+        bundle.putString("time", mFileName);
+        Log.i("aaaa","MakeCheckpoint"+String.valueOf(currentTime));
+        Log.i("aaaa","MakeCheckpoint"+commentText.getText().toString());
         intent.putExtras(bundle);
         setResult(RESULT_OK, intent);
         finish();

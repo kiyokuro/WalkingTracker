@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -380,6 +381,7 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
         this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.resourceId = resourceId;
         this.item = item;
+        queue = Volley.newRequestQueue(getContext());
     }
 
     @Override
@@ -405,10 +407,13 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
         lon.setText("軽度：" + item.getLon());
         if(item.isPhotoExist()){
             String str = item.getTime();
-            String url = "/http://www.project-one.sakura.ne.jp/e-net_api/photo/"+str;//写真のURLは座標にしてある
+
+            String url = "http://www.project-one.sakura.ne.jp/e-net_api/photo/"+str+".jpg";//写真のURLは時間にしてある
+            Log.i("aaaa","photoName"+url);
             image.setImageUrl(url, new ImageLoader(queue, new ImageLoader.ImageCache() {
                 @Override
                 public Bitmap getBitmap(String url) {
+
                     return null;
                 }
 
@@ -417,6 +422,9 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
 
                 }
             }));
+            //Bitmap bm = deformationPhoto(url);
+            //image.setImageBitmap(bm);
+
         }
 
         return view;
@@ -425,5 +433,21 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
     @Override
     public boolean isEnabled(int position){
         return true;
+    }
+
+    private Bitmap deformationPhoto(String filePath){
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+
+        BitmapFactory.decodeFile(filePath, options);
+
+        int inSampleSize = 4;//画像サイズを1/4する
+
+        // inSampleSize を計算
+        options.inSampleSize = inSampleSize;
+
+        // inSampleSize をセットしてデコード
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(filePath, options);
     }
 }

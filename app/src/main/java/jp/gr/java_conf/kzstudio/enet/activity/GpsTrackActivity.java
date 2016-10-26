@@ -17,6 +17,7 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -127,10 +128,6 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, _REQUEST_PERMISSION_GPS);
 
             } else {
-                Toast toast = Toast.makeText(this,
-                        "あなたの位置情報を利用するため、GPSの使用を許可してください", Toast.LENGTH_LONG);
-                toast.show();
-
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION,}, _REQUEST_PERMISSION_GPS);
             }
@@ -347,7 +344,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
                 String title = dateFormat.format(today);
                 intent.putExtra("title",title);
-                intent.putExtra("cuttentTime", currentTimeMillis);
+                intent.putExtra("currentTime", currentTimeMillis);
                 startActivityForResult(intent, 1);
 
                 isMarkerExist = true;
@@ -401,7 +398,9 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
 
         if (resultCode == RESULT_OK){
             createMarker("", bundle.getString("comment"));
-            mCheckPointPosition.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, bundle.getString("time"), bundle.getString("title"), String.valueOf(mCheckPointNum), true));
+            Log.i("aaaa","ActivityResult"+bundle.getString("time"));
+            Log.i("aaaa","ActivityResult"+bundle.getString("comment"));
+            mCheckPointPosition.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, bundle.getString("time"), bundle.getString("comment"), String.valueOf(mCheckPointNum), true));
             mCheckPointNum++;
         }
     }
