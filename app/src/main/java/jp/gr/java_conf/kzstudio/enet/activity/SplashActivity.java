@@ -60,19 +60,28 @@ public class SplashActivity extends Activity {
 	   	timer.schedule(myTask, 2000);
     }
 
-	private void changeActivity(){
-		Timer timer = new Timer();
-		TimerTask myTask;
+	private void changeActivity(int pageIndex){
+		switch (pageIndex) {
+			case 1:
+				Timer timer = new Timer();
+				TimerTask myTask;
 
-		myTask = new TimerTask(){
-			public void run(){
-				LodingIndicator.hideLoading();
-				Intent intent = new Intent(SplashActivity.this, HomeActivity.class);
+				myTask = new TimerTask() {
+					public void run() {
+						LodingIndicator.hideLoading();
+						Intent intent = new Intent(SplashActivity.this, HomeActivity.class);
+						startActivity(intent);
+						finish();
+					}
+				};
+				timer.schedule(myTask, 1500);
+				break;
+			case 2:
+				Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
 				startActivity(intent);
 				finish();
-			}
-		};
-		timer.schedule(myTask, 1500);
+				break;
+		}
 	}
 
 	private void apiForLogin(final String userId, final String userPassword) {
@@ -90,43 +99,16 @@ public class SplashActivity extends Activity {
 							String[] values = {userId, userPassword};
 
 							mUserPreference.saveUserPreference(keys, values);
-							changeActivity();
+							changeActivity(1);
 						}else {
-							new AlertDialog.Builder(mContext)
-									.setTitle("ログインできません")
-									.setMessage("入力情報を確認してください")
-									.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-										@TargetApi(Build.VERSION_CODES.M)
-										@Override
-										public void onClick(DialogInterface dialog, int which) {
-
-										}
-									})
-									.show();
+							changeActivity(2);
 						}
 					}
 				}
 				, new Response.ErrorListener() {
 			@Override
 			public void onErrorResponse(VolleyError error) {
-				// 通信失敗
-				new AlertDialog.Builder(mContext)
-						.setTitle("リトライ")
-						.setMessage("情報を再取得しますか？")
-						.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-							@TargetApi(Build.VERSION_CODES.M)
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								apiForLogin(userId, userPassword);
-							}
-						})
-						.setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								Toast.makeText(mContext, "ログインできませんでした。", Toast.LENGTH_SHORT).show();
-							}
-						})
-						.show();
+				changeActivity(2);
 			}
 		}
 		) {

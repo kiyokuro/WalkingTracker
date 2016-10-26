@@ -133,7 +133,6 @@ public class FunctionHomeActivity extends AppCompatActivity {
                         .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                findViewById(R.id.loadview).setVisibility(View.GONE);
                                 Toast.makeText(mContext,"情報を取得できませんでした。",Toast.LENGTH_SHORT).show();
                             }
                         })

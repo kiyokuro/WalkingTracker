@@ -3,12 +3,14 @@ package jp.gr.java_conf.kzstudio.enet.activity;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,9 +18,8 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,18 +29,25 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
+
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import jp.gr.java_conf.kzstudio.enet.R;
 import jp.gr.java_conf.kzstudio.enet.fragment.ProgressDialogFragment;
 import jp.gr.java_conf.kzstudio.enet.util.ItemDialogUtility;
-import jp.gr.java_conf.kzstudio.enet.util.UploadAsyncTask;
+import jp.gr.java_conf.kzstudio.enet.util.MultipartRequest;
 
 /**
  * Created by kiyokazu on 2016/10/19.
  */
 
-public class MakeCheckpointActivity extends FragmentActivity implements View.OnClickListener, LoaderManager.LoaderCallbacks<String>, ItemDialogUtility.Listener{
+public class MakeCheckpointActivity extends FragmentActivity implements View.OnClickListener, ItemDialogUtility.Listener{
 
     private static final ItemDialogUtility.ListItem[] items = {
             new ItemDialogUtility.ListItem("カメラで撮影", R.drawable.ic_dialog_camera_48),
@@ -49,6 +57,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     static final int REQUEST_CODE_CAMERA = 1; /* カメラを判定するコード */
     static final int REQUEST_CODE_GALLERY = 2; /* ギャラリーを判定するコード */
     private final int _REQUEST_PERMISSION_CAMERA = 0x01;
+    private final int _REQUEST_PERMISSION_STORAGE = 0x02;
 
     private ImageView imageView;
     private Button left_turn;
@@ -64,6 +73,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     private boolean isTakePhoto = false;
     private String title;
     private long currentTime;
+    private RequestQueue mQueue;
 
 
     @Override
@@ -90,6 +100,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         Intent intent = getIntent();
         title = intent.getStringExtra("title");
         currentTime = intent.getLongExtra("cuttentTime",0);
+        mQueue = Volley.newRequestQueue(this);
 
         if (Build.VERSION.SDK_INT >= 23) {
             checkPermission();
@@ -101,17 +112,14 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
      */
     @TargetApi(Build.VERSION_CODES.M)
     private void checkPermission() {
-        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.CAMERA)) {
-                ActivityCompat.requestPermissions(MakeCheckpointActivity.this,
-                        new String[]{Manifest.permission.CAMERA}, _REQUEST_PERMISSION_CAMERA);
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+                ActivityCompat.requestPermissions(MakeCheckpointActivity.this, new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE}, _REQUEST_PERMISSION_CAMERA);
 
             } else {
 
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.CAMERA,}, _REQUEST_PERMISSION_CAMERA);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE}, _REQUEST_PERMISSION_CAMERA);
             }
         }
     }
@@ -125,9 +133,9 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == _REQUEST_PERMISSION_CAMERA) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
             } else {
-                Toast toast = Toast.makeText(this, "カメラは利用できません", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(this, "見回り記録は利用できません", Toast.LENGTH_SHORT);
                 toast.show();
                 finish();
             }
@@ -176,10 +184,8 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
                 }else {
                     upload.setEnabled(false);
                     if (isTakePhoto) {
-                        //非同期処理の実行
-                        Bundle args = new Bundle();
-                        args.putStringArray("postMassege", postMessege);
-                        getSupportLoaderManager().initLoader(0, args, this);//onCreateLoderを実行する
+
+                        uploadPhoto();
                     } else {
                         closeActivity();
                     }
@@ -195,6 +201,10 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
         startActivityForResult(intent, REQUEST_CODE_CAMERA);
+    }
+
+    private void rotatePhoto(int angle){
+
     }
 
     @Override
@@ -262,10 +272,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         return uri;
     }
 
-    @Override
-    public Loader<String> onCreateLoader(int id, Bundle args) {
-        final File outputDir = getDir("eNet",Context.MODE_PRIVATE);
-        //プログレスダイアログの設定
+    private void uploadPhoto(){
         ProgressDialogFragment dialog = new ProgressDialogFragment();
         Bundle bundle = new Bundle();
         bundle.putString("Title","お待ち下さい");
@@ -273,20 +280,45 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         dialog.setArguments(bundle);
         dialog.show(getSupportFragmentManager(),"PROGRESS");
 
-        // サーバにアップロード
-        UploadAsyncTask uploadAsyncTask = new UploadAsyncTask(this, dialog, outputDir, mImageUri);
-        uploadAsyncTask.forceLoad();
-        return uploadAsyncTask;
-    }
+        Map<String, String> binaryParams = new HashMap<>();
+        Map<String,String> strMap = new HashMap<String, String>();
+        Map<String, File> fileMap = new HashMap<String, File>();
+        Log.i("aaaa",getPath(this, mImageUri));
+        strMap.put("name",String.valueOf(currentTime));
+        binaryParams.put("uploadFiles", getPath(this, mImageUri));
+        fileMap.put("uploadFiles", new File(getPath(this, mImageUri)));
 
-    @Override
-    public void onLoadFinished(Loader<String> loader, String data) {
-        //プログレスダイアログの終了処理
-        ProgressDialogFragment dialog = (ProgressDialogFragment)getSupportFragmentManager().findFragmentByTag("PROGRESS");
-        if(dialog != null){
-            dialog.onDismiss(dialog.getDialog());
-        }
-        closeActivity();
+        MultipartRequest multipartRequest = new MultipartRequest(
+                "http://www.project-one.sakura.ne.jp/e-net_api/TanboCameraServer.php",//insertPhoto.php",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //Upload成功
+                        Log.i("aaaa","uploadSuccess"+response);
+                        ProgressDialogFragment dialog = (ProgressDialogFragment)getSupportFragmentManager().findFragmentByTag("PROGRESS");
+                        if(dialog != null){
+                            dialog.onDismiss(dialog.getDialog());
+                        }
+                        closeActivity();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Upload失敗
+                        Log.i("aaaa","uploadFail"+ error.getMessage());
+                        ProgressDialogFragment dialog = (ProgressDialogFragment)getSupportFragmentManager().findFragmentByTag("PROGRESS");
+                        if(dialog != null){
+                            dialog.onDismiss(dialog.getDialog());
+                        }
+                        isTakePhoto = false;
+                    }
+                }/*,
+                strMap,
+                fileMap*/);
+        multipartRequest.setBinaryParams(binaryParams);
+        multipartRequest.setTextParams(strMap);
+        mQueue.add(multipartRequest);
     }
 
     private void closeActivity(){
@@ -298,11 +330,21 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         setResult(RESULT_OK, intent);
         finish();
     }
-
-    @Override
-    public void onLoaderReset(android.support.v4.content.Loader<String> loader) {
-
+    /**
+     * UriからPathへの変換処理
+     * @param uri
+     * @return String
+     */
+    public static String getPath(Context context, Uri uri) {
+        ContentResolver contentResolver = context.getContentResolver();
+        String[] columns = { MediaStore.Images.Media.DATA };
+        Cursor cursor = contentResolver.query(uri, columns, null, null, null);
+        cursor.moveToFirst();
+        String path = cursor.getString(0);
+        cursor.close();
+        return path;
     }
+
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
