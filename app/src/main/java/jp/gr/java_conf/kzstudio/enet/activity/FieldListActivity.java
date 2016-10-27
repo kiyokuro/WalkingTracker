@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.activity;
+package jp.gr.java_conf.kzstudio.enet.activity;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -9,13 +9,13 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import jp.gr.java_conf.kzstudio.walkingtracker.R;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.UserPreference;
+import jp.gr.java_conf.kzstudio.enet.R;
+import jp.gr.java_conf.kzstudio.enet.util.UserPreference;
 
 /**
- * Created by kiyokazu on 16/08/08.
+ * Created by kiyokazu on 16/08/06.
  */
-public class WeekWeatherActivity extends AppCompatActivity {
+public class FieldListActivity extends AppCompatActivity{
 
     private WebView webView;
 
@@ -23,7 +23,7 @@ public class WeekWeatherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_field_list);
-        setTitle("週間天気予報");
+        setTitle("水田一覧");
 
         webView = (WebView)findViewById(R.id.web_view_field_list);
         webView.getSettings().setJavaScriptEnabled(true);
@@ -51,7 +51,7 @@ public class WeekWeatherActivity extends AppCompatActivity {
         UserPreference userPreference = new UserPreference(this, "UserPref");
         String userName = userPreference.loadUserPreference("USER_ID");
         String passWord = userPreference.loadUserPreference("USER_PASSWORD");
-        webView.loadUrl("https://project-one.sakura.ne.jp/app/weather.php?username="+userName+"&password="+passWord);
+        webView.loadUrl("https://project-one.sakura.ne.jp/app/list.php?username="+userName+"&password="+passWord);
     }
 
     @Override

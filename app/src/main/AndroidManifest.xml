@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="jp.gr.java_conf.kzstudio.walkingtracker" >
+    package="jp.gr.java_conf.kzstudio.enet" >
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -9,6 +9,9 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"
@@ -30,7 +33,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".activity.SplashActivity"
+            android:name="jp.gr.java_conf.kzstudio.enet.activity.SplashActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_gps_track" >
             <intent-filter>
@@ -39,19 +42,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.FunctionHomeActivity"
+        <activity android:name="jp.gr.java_conf.kzstudio.enet.activity.FunctionHomeActivity"
             android:configChanges="orientation|screenSize"/>
-        <activity android:name=".activity.GpsTrackActivity"
+        <activity android:name="jp.gr.java_conf.kzstudio.enet.activity.GpsTrackActivity"
             android:configChanges="orientation|screenSize"/>
-        <activity android:name=".activity.DetailTrackDataActivity"
+        <activity android:name="jp.gr.java_conf.kzstudio.enet.activity.DetailTrackDataActivity"
             android:configChanges="orientation|screenSize"/>
-        <activity android:name=".activity.HomeActivity"/>
-        <activity android:name=".activity.LoginActivity"
+        <activity android:name="jp.gr.java_conf.kzstudio.enet.activity.HomeActivity"/>
+        <activity android:name="jp.gr.java_conf.kzstudio.enet.activity.LoginActivity"
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"/>
-        <activity android:name=".activity.SettingActivity"/>
-        <activity android:name=".activity.FieldListActivity"/>
-        <activity android:name=".activity.WeekWeatherActivity"/>
+        <activity android:name="jp.gr.java_conf.kzstudio.enet.activity.SettingActivity"/>
+        <activity android:name="jp.gr.java_conf.kzstudio.enet.activity.FieldListActivity"/>
+        <activity android:name="jp.gr.java_conf.kzstudio.enet.activity.WeekWeatherActivity"/>
+        <activity android:name="jp.gr.java_conf.kzstudio.enet.activity.MakeCheckpointActivity"/>
     </application>
 
 </manifest>

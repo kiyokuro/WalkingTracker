@@ -1,11 +1,11 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.util;
+package jp.gr.java_conf.kzstudio.enet.util;
 
 import android.app.Dialog;
 import android.content.Context;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ProgressBar;
 
-import jp.gr.java_conf.kzstudio.walkingtracker.R;
+import jp.gr.java_conf.kzstudio.enet.R;
 
 public class LodingIndicator {
 	

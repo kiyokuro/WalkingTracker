@@ -1,4 +1,4 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.activity;
+package jp.gr.java_conf.kzstudio.enet.activity;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -17,6 +17,7 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -41,16 +42,18 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import jp.gr.java_conf.kzstudio.walkingtracker.R;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.GpsPoint;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.UserPreference;
+import jp.gr.java_conf.kzstudio.enet.R;
+import jp.gr.java_conf.kzstudio.enet.util.GpsPoint;
+import jp.gr.java_conf.kzstudio.enet.util.UserPreference;
 
 public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, View.OnClickListener {
 
@@ -125,10 +128,6 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, _REQUEST_PERMISSION_GPS);
 
             } else {
-                Toast toast = Toast.makeText(this,
-                        "あなたの位置情報を利用するため、GPSの使用を許可してください", Toast.LENGTH_LONG);
-                toast.show();
-
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION,}, _REQUEST_PERMISSION_GPS);
             }
@@ -265,9 +264,9 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
 
         //初めての座標取得ならその地点をスタート地点とする
         if(mCheckPointPosition.size()<1){
-            mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", "スタート", " "));
+            mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", "スタート", " ", false));
         }else {
-            mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), false, " ", " ", " "));
+            mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), false, " ", " ", " ", false));
         }
         showNowLocation();
         drawPolyline(mMap, mPositions);
@@ -318,7 +317,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                 if(!isStart || isMarkerExist){
                     return;
                 }
-                final EditText editView = new EditText(this);
+                /*final EditText editView = new EditText(this);
                 new AlertDialog.Builder(GpsTrackActivity.this)
                         .setIcon(android.R.drawable.ic_dialog_info)
                         .setTitle("このポイントの記録事項を記入してください。")
@@ -337,7 +336,17 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                                 return;
                             }
                         })
-                        .show();
+                        .show();*/
+
+                Intent intent = new Intent(this, MakeCheckpointActivity.class);
+                long currentTimeMillis = System.currentTimeMillis();
+                Date today = new Date(currentTimeMillis);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+                String title = dateFormat.format(today);
+                intent.putExtra("title",title);
+                intent.putExtra("currentTime", currentTimeMillis);
+                startActivityForResult(intent, 1);
+
                 isMarkerExist = true;
                 break;
             case R.id.regist_route_button:
@@ -351,7 +360,7 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 //ゴール地点を作成のマーカを作る
-                                mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", "エンド", " "));
+                                mCheckPointPosition.add(new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, " ", "エンド", " ", false));
 
                                 TimeZone timeZone = TimeZone.getTimeZone("Asia/Tokyo");
                                 Calendar calendar = Calendar.getInstance(timeZone);
@@ -382,10 +391,24 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        Bundle bundle = data.getExtras();
+
+        if (resultCode == RESULT_OK){
+            createMarker("", bundle.getString("comment"));
+            Log.i("aaaa","ActivityResult"+bundle.getString("time"));
+            Log.i("aaaa","ActivityResult"+bundle.getString("comment"));
+            mCheckPointPosition.add(mCount, new GpsPoint(String.valueOf(mCount), String.valueOf(mLat), String.valueOf(mLon), true, bundle.getString("time"), bundle.getString("comment"), String.valueOf(mCheckPointNum), true));
+            mCheckPointNum++;
+        }
+    }
+
     private void createMarker(String title, String comment){
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(mLat, mLon))
-                .title(title)
+                .title(comment)
                         //.snippet(comment)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
     }
@@ -395,8 +418,8 @@ public class GpsTrackActivity extends FragmentActivity implements OnMapReadyCall
         String stringData = "";
         for(int i = 0; i< mCheckPointPosition.size(); i++){
             stringData += mCheckPointPosition.get(i).getOrder()+"@"+ mCheckPointPosition.get(i).getLan()+"@"+ mCheckPointPosition.get(i).getLon()+"@"+
-                    String.valueOf(mCheckPointPosition.get(i).isMarkerExist())+"@"+ mCheckPointPosition.get(i).getTitle()+"@"+
-                    mCheckPointPosition.get(i).getComment() + "@" + mCheckPointPosition.get(i).getCheckPointNum()+",";
+                    String.valueOf(mCheckPointPosition.get(i).isMarkerExist())+"@"+ mCheckPointPosition.get(i).getTime()+"@"+
+                    mCheckPointPosition.get(i).getComment() + "@" + mCheckPointPosition.get(i).getCheckPointNum()+"@"+mCheckPointPosition.get(i).isPhotoExist()+",";
         }
         return stringData;
     }

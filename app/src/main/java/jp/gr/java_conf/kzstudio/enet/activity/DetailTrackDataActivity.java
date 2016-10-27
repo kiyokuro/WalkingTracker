@@ -1,10 +1,12 @@
-package jp.gr.java_conf.kzstudio.walkingtracker.activity;
+package jp.gr.java_conf.kzstudio.enet.activity;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -26,6 +28,8 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -47,9 +51,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jp.gr.java_conf.kzstudio.walkingtracker.R;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.GpsPoint;
-import jp.gr.java_conf.kzstudio.walkingtracker.util.JsonParser;
+import jp.gr.java_conf.kzstudio.enet.R;
+import jp.gr.java_conf.kzstudio.enet.util.GpsPoint;
+import jp.gr.java_conf.kzstudio.enet.util.JsonParser;
 
 /**
  * Created by kiyokazu on 16/04/11.
@@ -209,7 +213,13 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                             String[] pointData = datas[i].split("@",-1);
                             //記録されている位置情報のうち、チェックポイントに登録されているものだけ取得したリストを作成
                             if(pointData[3].equals("true")){
-                                mCheckPointPosition.add(new GpsPoint(pointData[0],pointData[1],pointData[2],true,pointData[4],pointData[5],pointData[6]));
+                                if(pointData.length > 7 && pointData[7]!=null){
+                                    if(pointData[7].equals("true")) {
+                                        mCheckPointPosition.add(new GpsPoint(pointData[0], pointData[1], pointData[2], true, pointData[4], pointData[5], pointData[6], true));
+                                    }
+                                }else {
+                                    mCheckPointPosition.add(new GpsPoint(pointData[0], pointData[1], pointData[2], true, pointData[4], pointData[5], pointData[6], false));
+                                }
                                 createMarker(pointData[4],pointData[5],pointData[1],pointData[2]);
                             }
                             //記録されている位置情報をからリストを作成。移動経路をラインとして見せるために利用
@@ -217,7 +227,7 @@ public class DetailTrackDataActivity extends FragmentActivity implements OnMapRe
                         }
 
                         if(mCheckPointPosition.size()<1){
-                            mCheckPointPosition.add(new GpsPoint("0", "0", "0", false, "データなし", "データなし", "0"));
+                            mCheckPointPosition.add(new GpsPoint("0", "0", "0", false, "データなし", "データなし", "0", false));
                         }else {
                             //位置情報を全てつないだラインを地図上に描画する
                             drawPolyline(mMap, mLatLngs);
@@ -364,12 +374,14 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
     private LayoutInflater inflater;
     private int resourceId;
     private List<GpsPoint> item;
+    RequestQueue queue;
 
     public GPSPointListAdapter(Context context, int resourceId, List<GpsPoint> item){
         super(context, resourceId, item);
         this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.resourceId = resourceId;
         this.item = item;
+        queue = Volley.newRequestQueue(getContext());
     }
 
     @Override
@@ -386,12 +398,34 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
         TextView comment = (TextView)view.findViewById(R.id.comment);
         TextView lan = (TextView)view.findViewById(R.id.lan);
         TextView lon = (TextView)view.findViewById(R.id.lon);
+        NetworkImageView image = (NetworkImageView)view.findViewById(R.id.checkpoint_image);
 
         GpsPoint item = this.item.get(position);
         order.setText(item.getCheckPointNum());
         comment.setText(item.getComment());
         lan.setText("緯度："+item.getLan());
         lon.setText("軽度：" + item.getLon());
+        if(item.isPhotoExist()){
+            String str = item.getTime();
+
+            String url = "http://www.project-one.sakura.ne.jp/e-net_api/photo/"+str+".jpg";//写真のURLは時間にしてある
+            Log.i("aaaa","photoName"+url);
+            image.setImageUrl(url, new ImageLoader(queue, new ImageLoader.ImageCache() {
+                @Override
+                public Bitmap getBitmap(String url) {
+
+                    return null;
+                }
+
+                @Override
+                public void putBitmap(String url, Bitmap bitmap) {
+
+                }
+            }));
+            //Bitmap bm = deformationPhoto(url);
+            //image.setImageBitmap(bm);
+
+        }
 
         return view;
     }
@@ -399,5 +433,21 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
     @Override
     public boolean isEnabled(int position){
         return true;
+    }
+
+    private Bitmap deformationPhoto(String filePath){
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+
+        BitmapFactory.decodeFile(filePath, options);
+
+        int inSampleSize = 4;//画像サイズを1/4する
+
+        // inSampleSize を計算
+        options.inSampleSize = inSampleSize;
+
+        // inSampleSize をセットしてデコード
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(filePath, options);
     }
 }
