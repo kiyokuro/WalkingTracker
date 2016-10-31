@@ -66,29 +66,7 @@ public class FunctionHomeActivity extends AppCompatActivity {
         mWalkRecords = new ArrayList<>();
         mContext = this;
         getWalkRecordList();
-        //実験用コード-------------------------------------------------------------------------------------------------
-        /*for(int i=0; i<10; i++) {
-            mWalkRecords.add(new WalkRecord("動作確認用データ"+i, "2016/8/"+String.valueOf(i+1), String.valueOf(i)));
-        }
-        showRecordList();*/
-        //-------------------------------------------------------------------------------------------------
 
-        findViewById(R.id.camera).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                aaaaa();
-            }
-        });
-    }
-    private void aaaaa(){
-        Intent intent = new Intent(this, MakeCheckpointActivity.class);
-        long currentTimeMillis = System.currentTimeMillis();
-        Date today = new Date(currentTimeMillis);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-        String title = dateFormat.format(today);
-        intent.putExtra("title",title);
-        intent.putExtra("cuttentTime", currentTimeMillis);
-        startActivity(intent);
 
     }
 

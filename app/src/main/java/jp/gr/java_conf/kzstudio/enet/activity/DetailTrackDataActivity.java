@@ -408,7 +408,7 @@ class GPSPointListAdapter extends ArrayAdapter<GpsPoint> {
         if(item.isPhotoExist()){
             String str = item.getTime();
 
-            String url = "http://www.project-one.sakura.ne.jp/e-net_api/photo/"+str+".jpg";//写真のURLは時間にしてある
+            String url = "http://www.project-one.sakura.ne.jp/e-net_api/photo/"+str;//写真のURLは時間にしてある
             Log.i("aaaa","photoName"+url);
             image.setImageUrl(url, new ImageLoader(queue, new ImageLoader.ImageCache() {
                 @Override
