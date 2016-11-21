@@ -13,6 +13,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -60,6 +62,7 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     static final int REQUEST_CODE_GALLERY = 2; /* ギャラリーを判定するコード */
     private final int _REQUEST_PERMISSION_CAMERA = 0x01;
     private final int _REQUEST_PERMISSION_STORAGE = 0x02;
+    static final int RECORD_AUDIO = 0;
 
     private ImageView imageView;
     private Button left_turn;
@@ -77,6 +80,11 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
     private String mFileName;
     private long currentTime;
     private RequestQueue mQueue;
+
+    private MediaRecorder rec;
+    static final String filePath = Environment.getExternalStorageDirectory() + "/sample.wav";
+    private boolean recBool = false;
+    private ImageButton recBtn;
 
 
     @Override
@@ -98,6 +106,10 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         commentText = (EditText)findViewById(R.id.comment_text);
         upload = (Button)findViewById(R.id.upload);
         upload.setOnClickListener(this);
+
+        recBtn = (ImageButton) findViewById(R.id.recode);
+        recBtn.setOnClickListener(this);
+
         frameLayout = (FrameLayout) findViewById(R.id.frame);
 
         Intent intent = getIntent();
@@ -124,6 +136,10 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
 
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE}, _REQUEST_PERMISSION_CAMERA);
             }
+        }
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO);
         }
     }
 
@@ -172,6 +188,18 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
             case R.id.image:
                 wakeupCamera();
                 break;
+            case R.id.recode:
+                if (!recBool) {
+                    recBool = true;
+                    startRecord();
+                    Log.d("debug","recode start!!");
+
+                }else{
+                    stopRecode();
+                    recBool = false;
+                    Log.d("debug","recode stop.");
+                }
+                break;
             case R.id.upload:
                 if(commentText.getText().toString().equals("")){
                     new AlertDialog.Builder(MakeCheckpointActivity.this)
@@ -208,6 +236,36 @@ public class MakeCheckpointActivity extends FragmentActivity implements View.OnC
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
         startActivityForResult(intent, REQUEST_CODE_CAMERA);
+    }
+
+    private void startRecord(){
+        File wavFile = new File(filePath);
+        if (wavFile.exists()) {
+            wavFile.delete();
+        }
+        wavFile = null;
+        try {
+            rec = new MediaRecorder();
+            rec.setAudioSource(MediaRecorder.AudioSource.MIC);
+            rec.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
+            rec.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+            rec.setOutputFile(filePath);
+
+            rec.prepare();
+            rec.start();
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void stopRecode(){
+        try {
+            rec.stop();
+            rec.reset();
+            rec.release();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void rotatePhoto(int angle){
