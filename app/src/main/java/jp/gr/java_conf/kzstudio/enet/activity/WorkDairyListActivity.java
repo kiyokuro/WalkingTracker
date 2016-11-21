@@ -23,6 +23,7 @@ public class WorkDairyListActivity extends AppCompatActivity implements View.OnC
     private WebView webView;
 
     private Button mInputWorkDiaryButton;
+    private Button mShowWorkButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -32,6 +33,8 @@ public class WorkDairyListActivity extends AppCompatActivity implements View.OnC
 
         mInputWorkDiaryButton = (Button)findViewById(R.id.input_dairy);
         mInputWorkDiaryButton.setOnClickListener(this);
+        mShowWorkButton = (Button)findViewById(R.id.show_work);
+        mShowWorkButton.setOnClickListener(this);
 
         webView = (WebView)findViewById(R.id.web_view_field_list);
         webView.getSettings().setJavaScriptEnabled(true);
@@ -74,9 +77,14 @@ public class WorkDairyListActivity extends AppCompatActivity implements View.OnC
 
     @Override
     public void onClick(View v) {
+        Intent intent;
         switch (v.getId()){
             case R.id.input_dairy:
-                Intent intent = new Intent(this, WorkDairyInputActivity.class);
+                intent = new Intent(this, WorkDairyInputActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.show_work:
+                intent = new Intent(this, WorkContentsCheckList.class);
                 startActivity(intent);
                 break;
         }
