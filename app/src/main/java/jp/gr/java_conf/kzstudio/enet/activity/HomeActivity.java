@@ -23,6 +23,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     private Button mFieldList;
     private Button mWeatherButton;
+    private Button mDairyButton;
     private Button mWalkingTrackButton;
     private Button mSettingButton;
     private WebView webView;
@@ -37,6 +38,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mFieldList.setOnClickListener(this);
         mWeatherButton = (Button)findViewById(R.id.weather_button);
         mWeatherButton.setOnClickListener(this);
+        mDairyButton = (Button)findViewById(R.id.dairy_button);
+        mDairyButton.setOnClickListener(this);
         mWalkingTrackButton = (Button)findViewById(R.id.walking_track_button);
         mWalkingTrackButton.setOnClickListener(this);
         mSettingButton = (Button)findViewById(R.id.setting_button);
@@ -80,6 +83,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.weather_button:
                 intent = new Intent(this,WeekWeatherActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.dairy_button:
+                intent = new Intent(this,WorkDairyListActivity.class);
                 startActivity(intent);
                 break;
             case R.id.walking_track_button:

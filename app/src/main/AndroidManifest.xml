@@ -56,6 +56,9 @@
         <activity android:name="jp.gr.java_conf.kzstudio.enet.activity.FieldListActivity"/>
         <activity android:name="jp.gr.java_conf.kzstudio.enet.activity.WeekWeatherActivity"/>
         <activity android:name="jp.gr.java_conf.kzstudio.enet.activity.MakeCheckpointActivity"/>
+        <activity android:name=".activity.WorkDairyListActivity"/>
+        <activity android:name=".activity.WorkDairyInputActivity"/>
+        <activity android:name=".activity.WorkContentsCheckList"/>
     </application>
 
 </manifest>

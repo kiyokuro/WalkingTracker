@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
 
     <View
         android:layout_width="match_parent"
@@ -22,7 +23,8 @@
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:layout_weight="7"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
                     <TextView
                         android:id="@+id/comment_order"
                         android:layout_width="0dp"
@@ -36,16 +38,27 @@
                     <TextView
                         android:id="@+id/comment"
                         android:layout_width="0dp"
-                        android:layout_weight="7"
+                        android:layout_weight="6"
                         android:layout_height="wrap_content"
                         android:text="ローソンの前"
                         android:textSize="20dp"
                         android:layout_marginTop="10dp"/>
-                </LinearLayout>
+
+                    <!--http://icooon-mono.com/15443-%E5%86%8D%E7%94%9F%E3%83%9C%E3%82%BF%E3%83%B3/-->
+                    <ImageButton
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="#FFFFFF"
+                        android:src="@mipmap/playsound"
+                        android:layout_gravity="center"/>
+
+            </LinearLayout>
             <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/checkpoint_image"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"/>
         </LinearLayout>
         <LinearLayout
             android:layout_height="wrap_content"

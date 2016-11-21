@@ -25,6 +25,24 @@
             android:background="@drawable/frame_boder1"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="音声記録"
+            android:textSize="18dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"/>
+
+        <!--http://icooon-mono.com/11237-%E3%83%9E%E3%82%A4%E3%82%AF%E3%81%AE%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3/-->
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/microphone"
+            android:background="@drawable/frame_boder1"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

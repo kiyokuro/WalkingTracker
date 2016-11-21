@@ -40,6 +40,13 @@
             android:background="@drawable/frame_boder1"
             android:text="天気"/>
         <Button
+            android:id="@+id/dairy_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/frame_boder1"
+            android:text="作業日誌"/>
+        <Button
             android:id="@+id/walking_track_button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
