@@ -45,5 +45,6 @@ dependencies {
     compile 'io.github.openfeign:feign-gson:9.0.0'
     compile 'org.apache.httpcomponents:httpmime:4.5.2'
     compile 'org.apache.httpcomponents:httpcore:4.4.5'
+    compile 'com.oginotihiro:datepicker:1.0.0'
 }
 

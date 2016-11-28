@@ -21,8 +21,8 @@
                 android:text="前日"
                 android:textSize="20dp"
                 android:gravity="center"/>
-
-            <TextView
+            <Button
+                android:id="@+id/culender"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="8"
@@ -30,7 +30,7 @@
                 android:textSize="32dp"
                 android:layout_marginTop="20dp"
                 android:gravity="center"
-                android:id="@+id/textView" />
+                android:background="#ffffff"/>
 
             <TextView
                 android:layout_width="0dp"
