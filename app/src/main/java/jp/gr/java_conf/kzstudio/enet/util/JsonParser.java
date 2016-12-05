@@ -71,7 +71,6 @@ public class JsonParser {
             JSONObject jsonObject = jsonArray.getJSONObject(index);
             data.add(jsonObject.getString("id"));
             data.add(jsonObject.getString("date"));
-            data.add(jsonObject.getString("company_code"));
             data.add(jsonObject.getString("person_name"));
             data.add(jsonObject.getString("field_name"));
             data.add(jsonObject.getString("contents"));
