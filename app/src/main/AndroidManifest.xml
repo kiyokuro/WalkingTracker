@@ -59,6 +59,7 @@
         <activity android:name=".activity.WorkDairyListActivity"/>
         <activity android:name=".activity.WorkDairyInputActivity"/>
         <activity android:name=".activity.WorkContentsCheckList"/>
+        <activity android:name=".activity.WorkContentsInsert"/>
     </application>
 
 </manifest>

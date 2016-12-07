@@ -53,4 +53,32 @@ public class JsonParser {
         }
         return trackData;
     }
+
+    public int getJsonArrayLength(JSONObject json){
+        JSONArray jsonArray = null;
+        try{
+            jsonArray = json.getJSONArray("data");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonArray.length();
+    }
+
+    public ArrayList<String> getWorkListContent(JSONObject json, int index){
+        ArrayList<String> data = new ArrayList<>();
+        try{
+            JSONArray jsonArray = json.getJSONArray("data");
+            JSONObject jsonObject = jsonArray.getJSONObject(index);
+            data.add(jsonObject.getString("id"));
+            data.add(jsonObject.getString("date"));
+            data.add(jsonObject.getString("person_name"));
+            data.add(jsonObject.getString("field_name"));
+            data.add(jsonObject.getString("contents"));
+            data.add(jsonObject.getString("checkbox"));
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
 }
