@@ -18,6 +18,10 @@ public class CalenderDate {
         calendar.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
     }
 
+    /**
+     * 配列で今日の日付を返す。月と日は1桁でも"01月"の様に0はつかない。
+     * @return String[]{year,month,day}
+     */
     public String[] getTodayDate() {
         String year = String.valueOf(calendar.get(Calendar.YEAR));
         String month = String.valueOf(calendar.get(Calendar.MONTH)+1);

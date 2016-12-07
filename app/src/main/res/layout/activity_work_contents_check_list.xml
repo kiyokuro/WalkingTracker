@@ -24,6 +24,7 @@
     </LinearLayout>
 
     <Button
+        android:id="@+id/new_work_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="新規業務登録"

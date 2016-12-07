@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -58,6 +59,7 @@ import jp.gr.java_conf.kzstudio.enet.util.UserPreference;
 public class WorkContentsCheckList extends AppCompatActivity implements View.OnClickListener,DatePickerDialog.OnDateSetListener{
 
     Button mCalenderButton;
+    Button mNewWorkButton;
     ListView mWorkContentList;
 
     CalenderDate mCalenderDate;
@@ -76,6 +78,9 @@ public class WorkContentsCheckList extends AppCompatActivity implements View.OnC
         mCalenderButton = (Button)findViewById(R.id.culender);
         assert mCalenderButton != null;
         mCalenderButton.setOnClickListener(this);
+        mNewWorkButton = (Button)findViewById(R.id.new_work_button);
+        assert mNewWorkButton != null;
+        mNewWorkButton.setOnClickListener(this);
         mWorkContentList = (ListView)findViewById(R.id.work_comtent_list);
 
         mContext = this;
@@ -123,18 +128,7 @@ public class WorkContentsCheckList extends AppCompatActivity implements View.OnC
         });
     }
 
-    private void refleshListView(ArrayList<WorkContents> list, String id, String status){
-       /*for(int i=0;i<list.size();i++){
-            if(list.get(i).getId().equals(id)){
-                list.remove(id);
-                WorkContents temp = list.get(i);
-                list.add(i, new WorkContents(temp.getId(),temp.getDate(),temp.getName(),temp.getField(),temp.getContents(),status,R.drawable.checked));
-            }
-        }
-        WorkContentListAdapter adapter = (WorkContentListAdapter)mWorkContentList.getAdapter();
-        adapter.clear();
-        adapter.addAll(list);
-        adapter.notifyDataSetChanged();*/
+    private void refleshListView(){
         UserPreference userPreference = new UserPreference(mContext, "UserPref");
         //ユーザのcompanyCodeを取得し会社の作業を取得
         getCompanyCode(userPreference.loadUserPreference("USER_ID"));
@@ -147,6 +141,14 @@ public class WorkContentsCheckList extends AppCompatActivity implements View.OnC
             case R.id.culender:
                 datePickerDialog = new DatePickerDialog(this,this,Integer.parseInt(mDate[0]),Integer.parseInt(mDate[1])-1,Integer.parseInt(mDate[2]));
                 datePickerDialog.show();
+                break;
+            case R.id.new_work_button:
+                UserPreference userPreference = new UserPreference(mContext, "UserPref");
+                if(!userPreference.loadUserPreference("COMPANY_CODE").equals("")) {
+                    Intent intent = new Intent(this, WorkContentsInsert.class);
+                    startActivity(intent);
+                    finish();
+                }
                 break;
         }
     }
@@ -189,6 +191,10 @@ public class WorkContentsCheckList extends AppCompatActivity implements View.OnC
                             JsonParser jsonParser = new JsonParser();
                             //companyCodeを取得して作業リストを取得する
                             String companyCode = jsonParser.parseObject(response, "company_code").get(0);
+
+                            UserPreference userPreference = new UserPreference(mContext, "UserPref");
+                            userPreference.saveUserPreference(new String[]{"COMPANY_CODE"},new String[]{companyCode});
+
                             getWorkList(mDate[0],mDate[1],mDate[2],companyCode);
                         }catch (Exception e){
 
@@ -240,23 +246,28 @@ public class WorkContentsCheckList extends AppCompatActivity implements View.OnC
 
         mCalenderButton.setText(month+"/"+day);
         String fixDay;
+        String fixMonth;
+        if(month.length() == 1){
+            fixMonth = "0"+month;
+        }else {
+            fixMonth = month;
+        }
         if(day.length() == 1){
             fixDay = "0"+day;
         }else {
             fixDay = day;
         }
-        //日付とユーザコードを元にサーバからデータを取得
 
         RequestQueue requestQueue = Volley.newRequestQueue(mContext);
         JsonObjectRequest jsonReq = new JsonObjectRequest(
                 Request.Method.GET,
-                "http://project-one.sakura.ne.jp/e-net_api/SelectWorkList.php?company_code="+companyCode+"&date="+year+month+fixDay,
+                "http://project-one.sakura.ne.jp/e-net_api/SelectWorkList.php?company_code="+companyCode+"&date="+year+fixMonth+fixDay,
                 null,
                 new Response.Listener<JSONObject>() {
                     //通信成功
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.i("aaa",response.toString());
+                        //Log.i("aaa",response.toString());
                         ArrayList<String> dataList = new ArrayList<>();
                         ArrayList<WorkContents> workContentsList = new ArrayList<>();
                         JsonParser jsonParser = new JsonParser();
@@ -330,7 +341,7 @@ public class WorkContentsCheckList extends AppCompatActivity implements View.OnC
                         JsonParser jsonParser = new JsonParser();
                         String id = jsonParser.parseObject(response,"id").get(0);
 
-                        refleshListView(list,id,status);
+                        refleshListView();
                     }
                 },
                 new Response.ErrorListener() {
@@ -362,13 +373,13 @@ public class WorkContentsCheckList extends AppCompatActivity implements View.OnC
 }
 
 class WorkContents{
-    String id;
-    String date;
-    String name;
-    String field;
-    String contents;
-    String checkbox;
-    int image;
+    private String id;
+    private String date;
+    private String name;
+    private String field;
+    private String contents;
+    private String checkbox;
+    private int image;
 
     public WorkContents(String id,String date, String name, String field, String contents, String checkbox, int image){
         this.id = id;
@@ -413,14 +424,12 @@ class WorkContentListAdapter extends ArrayAdapter<WorkContents> {
     private LayoutInflater inflater;
     private int resourceId;
     private List<WorkContents> item;
-    RequestQueue queue;
 
     public WorkContentListAdapter(Context context, int resourceId, List<WorkContents> item) {
         super(context, resourceId, item);
         this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.resourceId = resourceId;
         this.item = item;
-        queue = Volley.newRequestQueue(getContext());
     }
 
     @Override
@@ -443,16 +452,7 @@ class WorkContentListAdapter extends ArrayAdapter<WorkContents> {
         field.setText(item.getField());
         contents.setText(item.getContents());
         image.setImageResource(item.getImage());
-        /*if (item.getCheckbox().equals("0")) {
-            image.setImageResource(R.drawable.checkbox);
-        }else{
-            image.setImageResource(R.drawable.checked);
-        }*/
 
         return view;
-    }
-    public void refleshItemList(List<WorkContents> item){
-        item.clear();
-        this.item = new ArrayList<WorkContents>(item);
     }
 }
